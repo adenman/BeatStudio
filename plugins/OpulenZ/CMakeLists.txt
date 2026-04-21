@@ -1,3 +1,8 @@
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/adplug/src/fmopl.c")
+	message(WARNING "adplug submodule not found, skipping OpulenZ.")
+	return()
+endif()
+
 include(BuildPlugin)
 
 add_library(adplug STATIC

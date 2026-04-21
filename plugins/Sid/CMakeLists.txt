@@ -1,5 +1,10 @@
 INCLUDE(BuildPlugin)
 
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/resid/resid/sid.cc")
+	message(WARNING "reSID submodule not found, skipping SID plugin.")
+	return()
+endif()
+
 if(NOT LMMS_HAVE_SID)
 	return()
 endif()

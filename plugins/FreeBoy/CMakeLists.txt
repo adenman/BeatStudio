@@ -1,3 +1,8 @@
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/game-music-emu/gme/Gb_Apu.cpp")
+	message(WARNING "game-music-emu submodule not found, skipping FreeBoy.")
+	return()
+endif()
+
 include(BuildPlugin)
 
 add_library(gme STATIC

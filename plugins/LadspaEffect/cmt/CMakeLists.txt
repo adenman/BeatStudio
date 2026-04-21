@@ -1,3 +1,8 @@
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/cmt/src")
+	message(WARNING "CMT submodule not found, skipping.")
+	return()
+endif()
+
 set_directory_properties(PROPERTIES SYSTEM TRUE)
 
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/include")
