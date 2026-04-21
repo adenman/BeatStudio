@@ -123,6 +123,7 @@ GuiApplication::GuiApplication()
 	// Show splash screen
 	QSplashScreen splashScreen( embed::getIconPixmap( "splash" ) );
 	splashScreen.setFixedSize(splashScreen.pixmap().size());
+	splashScreen.setWindowTitle( "Beat Studio" );
 	splashScreen.show();
 
 	QHBoxLayout layout;
@@ -133,7 +134,7 @@ GuiApplication::GuiApplication()
 	// & a right-aligned label for version info
 	QLabel loadingProgressLabel;
 	m_loadingProgressLabel = &loadingProgressLabel;
-	QLabel versionLabel(MainWindow::tr( "Version %1" ).arg( LMMS_VERSION ));
+	QLabel versionLabel(MainWindow::tr( "Beat Studio %1" ).arg( LMMS_VERSION ));
 
 	loadingProgressLabel.setAlignment(Qt::AlignLeft);
 	versionLabel.setAlignment(Qt::AlignRight);

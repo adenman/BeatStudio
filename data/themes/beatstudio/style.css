@@ -185,10 +185,10 @@ lmms--gui--PianoRoll {
 	qproperty-noteOpacity: 180;
 	qproperty-noteBorders: false;
 	qproperty-selectedNoteColor: #7a4400;
-	qproperty-ghostNoteColor: #1e1e1e;
+	qproperty-ghostNoteColor: #3a3a3a;
 	qproperty-ghostNoteTextColor: #ffffff;
-	qproperty-ghostNoteOpacity: 60;
-	qproperty-ghostNoteBorders: false;
+	qproperty-ghostNoteOpacity: 110;
+	qproperty-ghostNoteBorders: true;
 	qproperty-barColor: #b86400;
 	qproperty-markedSemitoneColor: rgba(255, 255, 255, 20);
 	qproperty-knifeCutLine: rgba(255, 60, 0, 255);
@@ -545,7 +545,9 @@ lmms--gui--EffectControlDialog QGroupBox::title {
 /* Main toolbar — FL Studio style dark bar with orange accent */
 QWidget#mainToolbar {
 	background: qlineargradient(spread:reflect, x1:0, y1:0, x2:0, y2:1, stop:0 #2e2e2e, stop:1 #1a1a1a);
-	border-bottom: 2px solid #ff8c00;
+	border-bottom: 3px solid #ff8c00;
+	min-height: 54px;
+	padding: 4px;
 }
 
 QToolBar {
@@ -708,11 +710,11 @@ lmms--gui--ControllerRackView QPushButton {
 lmms--gui--MixerChannelView {
 	background: #1a1a1a;
 	color: #e0e0e0;
-	qproperty-backgroundActive: #333333;
+	qproperty-backgroundActive: #3a2800;
 	qproperty-strokeOuterActive: #ff8c00;
 	qproperty-strokeOuterInactive: #2b2b2b;
-	qproperty-strokeInnerActive: #0a0a0a;
-	qproperty-strokeInnerInactive: #0a0a0a;
+	qproperty-strokeInnerActive: #ff8c00;
+	qproperty-strokeInnerInactive: #1a1a1a;
 }
 
 lmms--gui--MixerChannelView QGraphicsView {
@@ -786,10 +788,11 @@ lmms--gui--ClipView {
 lmms--gui--MidiClipView {
 	background-color: #cc7000;
 	color: rgba(255,255,255,220);
-	qproperty-noteFillColor: rgba(255, 255, 255, 220);
-	qproperty-noteBorderColor: rgb(180, 90, 0);
+	qproperty-noteFillColor: rgba(255, 255, 255, 240);
+	qproperty-noteBorderColor: rgb(200, 100, 0);
 	qproperty-mutedNoteFillColor: rgba(100, 100, 100, 220);
 	qproperty-mutedNoteBorderColor: rgb(55, 55, 55);
+	qproperty-gradient: true;
 }
 
 lmms--gui--SampleClipView {
@@ -805,10 +808,11 @@ lmms--gui--AutomationClipView {
 lmms--gui--PatternClipView {
 	background-color: #e87c00;
 	qproperty-emptyTrackHeightRatio: 0.5;
-	qproperty-verticalPadding: 0.15;
-	qproperty-noteVerticalSpacing: 0.2;
-	qproperty-noteHorizontalSpacing: 0.2;
+	qproperty-verticalPadding: 0.12;
+	qproperty-noteVerticalSpacing: 0.15;
+	qproperty-noteHorizontalSpacing: 0.15;
 	qproperty-noteColor: #ffffff;
+	qproperty-gradient: true;
 }
 
 /* Subwindows */
