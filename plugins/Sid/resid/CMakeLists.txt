@@ -1,5 +1,10 @@
 set_directory_properties(PROPERTIES SYSTEM TRUE)
 
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/resid/siddefs.h.in")
+	message(WARNING "reSID submodule not found, skipping SID plugin.")
+	return()
+endif()
+
 # These are the defaults
 set(RESID_INLINING 1)
 set(RESID_INLINE inline)

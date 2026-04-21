@@ -2,6 +2,11 @@ if(NOT FLTK_FOUND)
 	return()
 endif()
 
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/zynaddsubfx/src/Nio")
+	message(WARNING "ZynAddSubFX submodule not found, skipping.")
+	return()
+endif()
+
 INCLUDE(BuildPlugin)
 
 find_package(Threads REQUIRED)

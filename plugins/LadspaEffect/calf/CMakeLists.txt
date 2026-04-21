@@ -3,6 +3,11 @@
 
 set_directory_properties(PROPERTIES SYSTEM TRUE)
 
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/veal/src")
+	message(WARNING "CALF veal submodule src not found, skipping.")
+	return()
+endif()
+
 # Parse version info from autoconf
 FILE(READ veal/configure.ac VERSION_FILE)
 STRING(REPLACE "[" ";" VERSION_FILE ${VERSION_FILE} )
