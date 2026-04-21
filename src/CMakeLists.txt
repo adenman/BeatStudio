@@ -1,0 +1,220 @@
+ADD_SUBDIRECTORY(3rdparty)
+
+CONFIGURE_FILE("lmmsconfig.h.in"        "${CMAKE_BINARY_DIR}/lmmsconfig.h")
+
+# Provide config flags to lmmsversion.h
+get_cmake_property(_define_vars VARIABLES)
+foreach (_define_var ${_define_vars})
+    if(_define_var MATCHES "^WANT|LMMS_(HAVE|DEBUG)" )
+        list(APPEND LMMS_BUILD_OPTIONS "${_define_var}='${${_define_var}}'")
+    endif()
+endforeach()
+
+# Format for readability
+string(REPLACE ";" " " LMMS_BUILD_OPTIONS "${LMMS_BUILD_OPTIONS}")
+
+CONFIGURE_FILE("lmmsversion.h.in"       "${CMAKE_BINARY_DIR}/lmmsversion.h")
+
+SET(LMMS_SRCS "")
+
+SET(CMAKE_AUTOMOC ON)
+SET(CMAKE_AUTOUIC ON)
+SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
+# Enable C++20
+SET(CMAKE_CXX_STANDARD 20)
+
+IF(LMMS_BUILD_APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+ENDIF()
+
+ADD_SUBDIRECTORY(common)
+ADD_SUBDIRECTORY(core)
+ADD_SUBDIRECTORY(gui)
+ADD_SUBDIRECTORY(tracks)
+
+LIST(APPEND LMMS_SRCS ${LMMS_COMMON_SRCS})
+
+IF(WANT_QT6)
+	QT6_WRAP_UI(LMMS_UI_OUT ${LMMS_UIS})
+ELSE()
+	QT5_WRAP_UI(LMMS_UI_OUT ${LMMS_UIS})
+ENDIF()
+
+INCLUDE_DIRECTORIES(
+	"${CMAKE_CURRENT_BINARY_DIR}"
+	"${CMAKE_BINARY_DIR}"
+	"${CMAKE_BINARY_DIR}/include"
+	"${CMAKE_SOURCE_DIR}"
+	"${CMAKE_SOURCE_DIR}/include"
+)
+
+IF(WIN32 AND MSVC)
+	SET(WINRC "${CMAKE_BINARY_DIR}/lmms.rc")
+ELSEIF(WIN32)
+	SET(WINRC "${CMAKE_BINARY_DIR}/lmmsrc.obj")
+	ADD_CUSTOM_COMMAND(OUTPUT "${WINRC}"
+				COMMAND "${CMAKE_RC_COMPILER}"
+					"-I\"${CMAKE_SOURCE_DIR}\""
+					"-o\"${CMAKE_BINARY_DIR}/lmmsrc.obj\""
+					"-i\"${CMAKE_BINARY_DIR}/lmms.rc\""
+				DEPENDS "${CMAKE_BINARY_DIR}/lmms.rc")
+ENDIF()
+
+INCLUDE(GenQrc)
+ADD_GEN_QRC(LMMS_RCC_OUT lmms.qrc
+	"${CMAKE_SOURCE_DIR}/doc/AUTHORS"
+	"${CMAKE_SOURCE_DIR}/LICENSE.txt"
+	"${CONTRIBUTORS}"
+)
+
+# Paths relative to lmms executable
+FILE(RELATIVE_PATH LIB_DIR_RELATIVE "/${BIN_DIR}" "/${LIB_DIR}")
+FILE(RELATIVE_PATH PLUGIN_DIR_RELATIVE "/${BIN_DIR}" "/${PLUGIN_DIR}")
+ADD_DEFINITIONS(-DLIB_DIR="${LIB_DIR_RELATIVE}" -DPLUGIN_DIR="${PLUGIN_DIR_RELATIVE}" ${PULSEAUDIO_DEFINITIONS})
+include_directories(SYSTEM
+	${JACK_INCLUDE_DIRS}
+	${SNDIO_INCLUDE_DIRS}
+	${FFTW3F_INCLUDE_DIRS}
+)
+
+IF(PULSEAUDIO_INCLUDE_DIR)
+	include_directories(SYSTEM "${PULSEAUDIO_INCLUDE_DIR}")
+ENDIF()
+
+IF(LV2_INCLUDE_DIRS)
+	include_directories(SYSTEM ${LV2_INCLUDE_DIRS})
+ENDIF()
+
+IF(Lilv_INCLUDE_DIRS)
+	include_directories(SYSTEM ${Lilv_INCLUDE_DIRS})
+ENDIF()
+
+IF(SUIL_INCLUDE_DIRS)
+	include_directories(SYSTEM ${SUIL_INCLUDE_DIRS})
+ENDIF()
+
+# Use libraries in non-standard directories (e.g., another version of Qt)
+IF(LMMS_BUILD_LINUX)
+	LINK_LIBRARIES(-Wl,--enable-new-dtags)
+	SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+ENDIF()
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+ADD_LIBRARY(lmmsobjs OBJECT
+	${LMMS_SRCS}
+	${LMMS_INCLUDES}
+	${LMMS_RCC_OUT}
+)
+
+GENERATE_EXPORT_HEADER(lmmsobjs
+	BASE_NAME lmms
+)
+
+ADD_EXECUTABLE(lmms
+	core/main.cpp
+	"${WINRC}"
+)
+TARGET_INCLUDE_DIRECTORIES(lmms
+	PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
+)
+target_static_libraries(lmms PUBLIC lmmsobjs)
+
+# Enable updated C++ language standards
+IF(MSVC)
+	TARGET_COMPILE_OPTIONS(lmmsobjs PUBLIC "/Zc:__cplusplus" "/permissive-")
+ENDIF()
+
+# CMake doesn't define target_EXPORTS for OBJECT libraries.
+# See the documentation of DEFINE_SYMBOL for details.
+# Also add LMMS_STATIC_DEFINE for targets linking against it.
+TARGET_COMPILE_DEFINITIONS(lmmsobjs
+	PRIVATE -Dlmmsobjs_EXPORTS
+)
+target_static_definitions(lmmsobjs LMMS_STATIC_DEFINE)
+
+# Set Visual Studio startup project to lmms
+# https://stackoverflow.com/a/37994396/8166701
+IF(NOT CMAKE_VERSION VERSION_LESS 3.6)
+	SET_PROPERTY(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT lmms)
+ENDIF()
+
+SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${LMMS_RCC_OUT} lmmsconfig.h lmms.1.gz")
+
+IF(LMMS_BUILD_WIN32)
+	SET(EXTRA_LIBRARIES "winmm")
+ENDIF()
+
+IF(LMMS_BUILD_APPLE)
+	SET(EXTRA_LIBRARIES "-framework CoreMIDI -framework CoreFoundation")
+ENDIF()
+
+if(LMMS_HAVE_OSS AND LMMS_BUILD_OPENBSD)
+    SET(EXTRA_LIBRARIES "-lossaudio")
+endif()
+
+IF(LMMS_BUILD_HAIKU)
+	SET(EXTRA_LIBRARIES "-lnetwork")
+ENDIF()
+
+if(LMMS_HAVE_LIBRT)
+	list(APPEND EXTRA_LIBRARIES "rt")
+endif()
+
+if(LMMS_HAVE_PORTAUDIO)
+	list(APPEND EXTRA_LIBRARIES portaudio::portaudio)
+endif()
+
+if(LMMS_HAVE_MP3LAME)
+	list(APPEND EXTRA_LIBRARIES mp3lame::mp3lame)
+endif()
+
+if(LMMS_HAVE_OGGVORBIS)
+	list(APPEND EXTRA_LIBRARIES Vorbis::vorbisenc Vorbis::vorbisfile)
+endif()
+
+if(LMMS_HAVE_LV2)
+	list(APPEND EXTRA_LIBRARIES Lilv::lilv)
+endif()
+
+SET(LMMS_REQUIRED_LIBS ${LMMS_REQUIRED_LIBS}
+	${CMAKE_THREAD_LIBS_INIT}
+	${QT_LIBRARIES}
+	${ASOUND_LIBRARY}
+	${SDL_LIBRARY}
+	${SDL2_LIBRARY}
+	${SOUNDIO_LIBRARY}
+	${SNDIO_LIBRARIES}
+	${PULSEAUDIO_LIBRARIES}
+	${JACK_LIBRARIES}
+	${SUIL_LIBRARIES}
+	${FFTW3F_LIBRARIES}
+	SampleRate::samplerate
+	SndFile::sndfile
+	${EXTRA_LIBRARIES}
+)
+
+target_link_libraries(lmmsobjs
+	${LMMS_REQUIRED_LIBS}
+)
+target_static_libraries(lmmsobjs ringbuffer)
+
+set_target_properties(lmms PROPERTIES
+	ENABLE_EXPORTS ON
+	WIN32_EXECUTABLE $<NOT:$<CONFIG:DEBUG>>
+)
+
+set_target_properties(lmmsobjs PROPERTIES AUTOUIC_SEARCH_PATHS "gui/modals")
+
+IF(NOT WIN32 AND NOT LMMS_BUILD_APPLE)
+	if(CMAKE_INSTALL_MANDIR)
+		SET(INSTALL_MANDIR ${CMAKE_INSTALL_MANDIR})
+	ELSE(CMAKE_INSTALL_MANDIR)
+		SET(INSTALL_MANDIR share/man)
+	ENDIF(CMAKE_INSTALL_MANDIR)
+	INSTALL(FILES "${CMAKE_BINARY_DIR}/lmms.1.gz"
+			DESTINATION "${INSTALL_MANDIR}/man1/"
+			PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
+ENDIF()
+
+INSTALL(TARGETS lmms RUNTIME DESTINATION "${BIN_DIR}")

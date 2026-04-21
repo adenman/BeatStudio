@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+
+    <key>CFBundleDevelopmentRegion</key>
+    <string>English</string>
+
+    <key>CFBundleIconFile</key>
+    <string>@CPACK_PROJECT_NAME@</string>
+
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+
+    <key>CFBundleGetInfoString</key>
+    <string>@CPACK_PROJECT_NAME_UCASE@ @CPACK_PROJECT_VERSION@</string>
+
+<!--
+    #############################################################
+    #    Apple Creator Code Registered Application Signatures   #
+    #############################################################
+    #    Company:       LMMS Foundation                         #
+    #    Registrant:    tres.finocchiaro@gmail.com              #
+    #    ASCII Code:    LMMS                                    #
+    #    HEX:           4C4D4D53                                #
+    #############################################################
+    #    Contact Apple Developer Support at cfreg@apple.com     #
+    #    with any requested changes                             #
+    #############################################################
+-->
+    <key>CFBundleSignature</key>
+    <string>@CPACK_PROJECT_NAME_UCASE@</string>
+
+    <key>CFBundleExecutable</key>
+    <string>@CPACK_PROJECT_NAME@</string>
+
+    <key>CFBundleVersion</key>
+    <string>@CPACK_PROJECT_VERSION@</string>
+
+    <key>CFBundleShortVersionString</key>
+    <string>@VERSIONCPACK_PROJECT_VERSION@</string>
+
+    <key>CFBundleName</key>
+    <string>@CPACK_PROJECT_NAME_UCASE@</string>
+
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+
+    <key>CFBundleIdentifier</key>
+    <string>@MACOS_MIMETYPE_ID@</string>
+
+    <key>CFBundleDocumentTypes</key>
+    <array>
+
+      <dict>
+        <key>CFBundleTypeExtensions</key>
+          <array>
+            <string>mmpz</string>
+          </array>
+        <key>CFBundleTypeIconFile</key>
+        <string>project</string>
+        <key>CFBundleTypeName</key>
+        <string>@CPACK_PROJECT_NAME_UCASE@ Project</string>
+        <key>CFBundleTypeOSTypes</key>
+           <array>
+             <string>mmpz</string>
+           </array>
+        <key>CFBundleTypeRole</key>
+        <string>Editor</string>
+        <key>CFBundleTypeMIMETypes</key>
+        <array>
+           <string>application/x-@CPACK_PROJECT_NAME@-project</string>
+        </array>
+      </dict>
+
+      <dict>
+        <key>CFBundleTypeExtensions</key>
+          <array>
+            <string>mmp</string>
+          </array>
+        <key>CFBundleTypeIconFile</key>
+        <string>project</string>
+        <key>CFBundleTypeName</key>
+        <string>@CPACK_PROJECT_NAME_UCASE@ Project (uncompressed)</string>
+        <key>CFBundleTypeOSTypes</key>
+           <array>
+             <string>mmp</string>
+           </array>
+        <key>CFBundleTypeRole</key>
+        <string>Editor</string>
+        <key>CFBundleTypeMIMETypes</key>
+        <array>
+           <string>application/x-@CPACK_PROJECT_NAME@-project</string>
+        </array>
+      </dict>
+
+    </array>
+
+    <key>UTExportedTypeDeclarations</key>
+        <array>
+            <dict>
+                <key>UTTypeIdentifier</key>
+                <string>@MACOS_MIMETYPE_ID@.mmpz</string>
+                <key>UTTypeReferenceURL</key>
+                <string>@CPACK_PROJECT_URL@</string>
+                <key>UTTypeDescription</key>
+                <string>@CPACK_PROJECT_VERSIONPROJECT_NAME_UCASE@ Project</string>
+                <key>UTTypeIconFile</key>
+                <string>project</string>
+                <key>UTTypeConformsTo</key>
+                <array>
+                    <string>public.data</string>
+                </array>
+                <key>UTTypeTagSpecification</key>
+                <dict>
+                    <key>public.filename-extension</key>
+                    <array>
+                        <string>mmpz</string>
+                    </array>
+                </dict>
+            </dict>
+
+            <dict>
+                <key>UTTypeIdentifier</key>
+                <string>@MACOS_MIMETYPE_ID@.mmp</string>
+                <key>UTTypeReferenceURL</key>
+                <string>@CPACK_PROJECT_URL@</string>
+                <key>UTTypeDescription</key>
+                <string>@CPACK_PROJECT_NAME_UCASE@ Project (uncompressed)</string>
+                <key>UTTypeIconFile</key>
+                <string>project</string>
+                <key>UTTypeConformsTo</key>
+                <array>
+                    <string>public.xml</string>
+                    <string>public.data</string>
+                </array>
+                <key>UTTypeTagSpecification</key>
+                <dict>
+                    <key>public.filename-extension</key>
+                    <array>
+                        <string>mmp</string>
+                    </array>
+                </dict>
+            </dict>
+        </array>
+        <key>NSPrincipalClass</key>
+        <string>NSApplication</string>
+        <key>NSHighResolutionCapable</key>
+        <string>True</string>
+        <key>NSRequiresAquaSystemAppearance</key>
+        <string>False</string>
+  </dict>
+</plist>
