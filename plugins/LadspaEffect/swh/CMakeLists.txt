@@ -8,7 +8,8 @@ execute_process(
 )
 
 if (NOT MOREUTILS_RESULT EQUAL 0)
-    message(FATAL_ERROR "Perl module \"List::MoreUtils\" is required for building LadspaEffect/swh.\n")
+    message(WARNING "Perl module \"List::MoreUtils\" not found, skipping LadspaEffect/swh.")
+    return()
 endif()
 
 # Create blank config.h
