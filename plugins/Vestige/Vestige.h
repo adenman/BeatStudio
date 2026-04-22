@@ -31,6 +31,7 @@
 
 #include "Instrument.h"
 #include "InstrumentView.h"
+#include "Plugin.h"
 #include "SubWindow.h"
 
 
@@ -58,7 +59,8 @@ class VestigeInstrument : public Instrument
 {
 	Q_OBJECT
 public:
-	VestigeInstrument( InstrumentTrack * _instrument_track );
+	VestigeInstrument( InstrumentTrack * _instrument_track,
+		Plugin::Descriptor::SubPluginFeatures::Key * key = nullptr );
 	virtual ~VestigeInstrument();
 
 	virtual void play( SampleFrame* _working_buffer );
