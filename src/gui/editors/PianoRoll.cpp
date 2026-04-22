@@ -2489,8 +2489,6 @@ void PianoRoll::mouseMoveEvent( QMouseEvent * me )
 		}
 	}
 
-
-	}
 	else if( m_action == Action::ResizeNoteEditArea )
 	{
 		// Don't try to show more keys than the full keyboard, bail if trying to
