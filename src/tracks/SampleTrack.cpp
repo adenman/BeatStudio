@@ -104,7 +104,8 @@ bool SampleTrack::play( const TimePos & _start, const f_cnt_t _frames,
 			Clip * clip = getClip( i );
 			auto sClip = dynamic_cast<SampleClip*>(clip);
 
-			if( _start >= sClip->startPosition() && _start < sClip->endPosition() )
+			// Beat Studio: always include recording clips regardless of position
+			if( sClip->isRecord() || (_start >= sClip->startPosition() && _start < sClip->endPosition()) )
 			{
 				if( sClip->isPlaying() == false && _start >= (sClip->startPosition() + sClip->startTimeOffset()) )
 				{
