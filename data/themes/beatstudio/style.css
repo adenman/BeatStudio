@@ -1014,7 +1014,6 @@ lmms--gui--TrackView {
 	background-color: #252525;
 	border-bottom: 1px solid #1a1a1a;
 	min-height: 32px;
-	max-height: 32px;
 }
 
 lmms--gui--TrackView:hover {
