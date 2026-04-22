@@ -43,6 +43,7 @@
 #include "Knob.h"
 #include "SampleClip.h"
 #include "SampleTrackWindow.h"
+#include "TimePos.h"
 #include "SongEditor.h"
 #include "StringPairDrag.h"
 #include "TrackContainerView.h"
@@ -112,10 +113,17 @@ SampleTrackView::SampleTrackView( SampleTrack * _t, TrackContainerView* tcv ) :
 	);
 	connect(m_recordButton, &QPushButton::toggled, [_t](bool checked) {
 		// Find the first clip on this track and set its record state
+		bool foundClip = false;
 		for (auto* clip : _t->getClips()) {
 			if (auto* sc = dynamic_cast<SampleClip*>(clip)) {
 				sc->setRecord(checked);
+				foundClip = true;
 			}
+		}
+		// If no clips exist and we're arming, create one at position 0
+		if (checked && !foundClip) {
+			auto* sc = dynamic_cast<SampleClip*>(_t->createClip(TimePos(0)));
+			if (sc) sc->setRecord(true);
 		}
 	});
 	layout->addWidget(m_recordButton);
