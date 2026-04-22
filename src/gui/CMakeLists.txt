@@ -91,6 +91,7 @@ SET(LMMS_SRCS
 	gui/tracks/InstrumentTrackView.cpp
 	gui/tracks/PatternTrackView.cpp
 	gui/tracks/SampleTrackView.cpp
+	gui/tracks/BeatStudioRecorder.cpp
 	gui/tracks/TrackContentWidget.cpp
 	gui/tracks/TrackLabelButton.cpp
 	gui/tracks/TrackOperationsWidget.cpp

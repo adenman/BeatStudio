@@ -31,6 +31,8 @@
 #include <QSpacerItem>
 #include <QVBoxLayout>
 
+#include "BeatStudioRecorder.h"
+
 #include "ConfigManager.h"
 #include "DeprecationHelper.h"
 #include "embed.h"
@@ -110,22 +112,21 @@ SampleTrackView::SampleTrackView( SampleTrack * _t, TrackContainerView* tcv ) :
 		"QPushButton:checked { background: #cc0000; border: 1px solid #ff0000; }"
 		"QPushButton:hover { border: 1px solid #ff8c00; }"
 	);
-	connect(m_recordButton, &QPushButton::toggled, [_t](bool checked) {
-		// Find the first clip on this track and set its record state
-		bool foundClip = false;
-		for (auto* clip : _t->getClips()) {
-			if (auto* sc = dynamic_cast<SampleClip*>(clip)) {
-				sc->setRecord(checked);
-				foundClip = true;
-			}
+	// Beat Studio: standalone recorder using PortAudio directly
+	m_recorder = new BeatStudioRecorder(this);
+	connect(m_recorder, &BeatStudioRecorder::recordingFinished, [_t](const QString& filePath) {
+		// Create a sample clip with the recorded file
+		auto* sc = dynamic_cast<SampleClip*>(_t->createClip(TimePos(0)));
+		if (sc) {
+			_t->addClip(sc);
+			sc->setSampleFile(filePath);
 		}
-		// If no clips exist and we're arming, create one at position 0
-		if (checked && !foundClip) {
-			auto* sc = dynamic_cast<SampleClip*>(_t->createClip(TimePos(0)));
-			if (sc) {
-				_t->addClip(sc); // Beat Studio: must add to track's clip list
-				sc->setRecord(true);
-			}
+	});
+	connect(m_recordButton, &QPushButton::toggled, [this](bool checked) {
+		if (checked) {
+			m_recorder->startRecording();
+		} else {
+			m_recorder->stopRecording();
 		}
 	});
 	layout->addWidget(m_recordButton);

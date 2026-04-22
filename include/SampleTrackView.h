@@ -30,6 +30,8 @@
 #include "TrackView.h"
 #include <QPushButton>
 
+namespace lmms::gui { class BeatStudioRecorder; }
+
 namespace lmms
 {
 
@@ -94,6 +96,7 @@ private:
 	Knob * m_volumeKnob;
 	Knob * m_panningKnob;
 	QPushButton * m_recordButton{nullptr};
+	BeatStudioRecorder * m_recorder{nullptr};
 	FadeButton * m_activityIndicator;
 
 	TrackLabelButton * m_tlb;
