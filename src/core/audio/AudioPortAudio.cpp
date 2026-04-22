@@ -221,14 +221,17 @@ int AudioPortAudio::processCallback(const void* input, void* output, unsigned lo
 	}
 
 	// Beat Studio: push input frames for audio recording
+	// Input is typically mono from a mic - read as 1 channel and duplicate
 	if (input != nullptr)
 	{
 		const auto inputBuffer = reinterpret_cast<const float*>(input);
 		auto inputFrames = std::vector<SampleFrame>(frameCount);
 		for (unsigned long i = 0; i < frameCount; ++i)
 		{
-			inputFrames[i][0] = inputBuffer[i * channels];
-			inputFrames[i][1] = channels > 1 ? inputBuffer[i * channels + 1] : inputBuffer[i * channels];
+			// Read first channel, duplicate to both stereo channels
+			float sample = inputBuffer[i];
+			inputFrames[i][0] = sample;
+			inputFrames[i][1] = sample;
 		}
 		device->audioEngine()->pushInputFrames(inputFrames.data(), frameCount);
 	}
