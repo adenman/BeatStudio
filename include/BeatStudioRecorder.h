@@ -5,11 +5,10 @@
 #include <QString>
 #include <vector>
 #include <atomic>
-#include <portaudio.h>
 
 namespace lmms::gui {
 
-class BeatStudioRecorder : public QThread
+class BeatStudioRecorder : public QObject
 {
     Q_OBJECT
 public:
@@ -23,16 +22,14 @@ public:
 signals:
     void recordingFinished(const QString& filePath);
 
-protected:
-    void run() override;
+private slots:
+    void onAudioData();
 
 private:
-    static int paCallback(const void* input, void* output,
-        unsigned long frameCount,
-        const PaStreamCallbackTimeInfo* timeInfo,
-        PaStreamCallbackFlags statusFlags,
-        void* userData);
+    void saveWav();
 
+    class QAudioSource* m_audioSource{nullptr};
+    class QIODevice* m_audioDevice{nullptr};
     std::vector<float> m_buffer;
     QMutex m_mutex;
     std::atomic<bool> m_recording{false};

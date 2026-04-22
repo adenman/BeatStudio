@@ -1,123 +1,124 @@
 #include "BeatStudioRecorder.h"
+#include <QAudioSource>
+#include <QAudioFormat>
+#include <QAudioDevice>
+#include <QMediaDevices>
 #include <QDateTime>
 #include <QStandardPaths>
 #include <QDir>
-#include <QDebug>
-#include <QMutexLocker>
 #include <QFile>
 #include <QDataStream>
-#include <cstdint>
+#include <QDebug>
+#include <QMutexLocker>
 #include <algorithm>
+#include <cstdint>
 
 namespace lmms::gui {
 
 BeatStudioRecorder::BeatStudioRecorder(QObject* parent)
-    : QThread(parent)
+    : QObject(parent)
 {
 }
 
 BeatStudioRecorder::~BeatStudioRecorder()
 {
-    m_recording = false;
-    if (isRunning()) {
-        wait(5000);
-        terminate();
-    }
+    stopRecording();
 }
 
 void BeatStudioRecorder::startRecording()
 {
-    if (isRunning()) return;
+    if (m_recording) return;
+
+    QAudioFormat format;
+    format.setSampleRate(m_sampleRate);
+    format.setChannelCount(1);
+    format.setSampleFormat(QAudioFormat::Float);
+
+    QAudioDevice inputDevice = QMediaDevices::defaultAudioInput();
+    if (inputDevice.isNull()) {
+        qDebug("[BeatStudio] No audio input device found");
+        return;
+    }
+
+    // Check format is supported, fall back to Int16 if needed
+    if (!inputDevice.isFormatSupported(format)) {
+        format.setSampleFormat(QAudioFormat::Int16);
+        if (!inputDevice.isFormatSupported(format)) {
+            qDebug("[BeatStudio] Audio format not supported");
+            return;
+        }
+    }
+
     {
         QMutexLocker lock(&m_mutex);
         m_buffer.clear();
     }
+
+    m_audioSource = new QAudioSource(inputDevice, format, this);
+    m_audioDevice = m_audioSource->start();
+
+    if (!m_audioDevice) {
+        qDebug("[BeatStudio] Failed to start audio source");
+        delete m_audioSource;
+        m_audioSource = nullptr;
+        return;
+    }
+
     m_recording = true;
-    start();
+
+    // Poll for data every 50ms
+    connect(m_audioDevice, &QIODevice::readyRead, this, &BeatStudioRecorder::onAudioData);
+
+    qDebug("[BeatStudio] Recording started via Qt QAudioSource");
+}
+
+void BeatStudioRecorder::onAudioData()
+{
+    if (!m_recording || !m_audioDevice) return;
+
+    QByteArray data = m_audioDevice->readAll();
+    if (data.isEmpty()) return;
+
+    QMutexLocker lock(&m_mutex);
+
+    // Check what format we got
+    if (m_audioSource->format().sampleFormat() == QAudioFormat::Float) {
+        const float* samples = reinterpret_cast<const float*>(data.constData());
+        int count = data.size() / sizeof(float);
+        for (int i = 0; i < count; ++i) {
+            m_buffer.push_back(samples[i]);
+            m_buffer.push_back(samples[i]); // mono -> stereo
+        }
+    } else {
+        // Int16
+        const int16_t* samples = reinterpret_cast<const int16_t*>(data.constData());
+        int count = data.size() / sizeof(int16_t);
+        for (int i = 0; i < count; ++i) {
+            float s = samples[i] / 32768.f;
+            m_buffer.push_back(s);
+            m_buffer.push_back(s);
+        }
+    }
 }
 
 void BeatStudioRecorder::stopRecording()
 {
+    if (!m_recording) return;
     m_recording = false;
-    // Thread will finish naturally and emit recordingFinished
+
+    if (m_audioSource) {
+        m_audioSource->stop();
+        delete m_audioSource;
+        m_audioSource = nullptr;
+        m_audioDevice = nullptr;
+    }
+
+    qDebug("[BeatStudio] Recording stopped, saving...");
+    saveWav();
 }
 
-int BeatStudioRecorder::paCallback(const void* input, void* /*output*/,
-    unsigned long frameCount,
-    const PaStreamCallbackTimeInfo*,
-    PaStreamCallbackFlags,
-    void* userData)
+void BeatStudioRecorder::saveWav()
 {
-    auto* rec = static_cast<BeatStudioRecorder*>(userData);
-    if (!rec->m_recording.load()) return paComplete;
-
-    const float* in = static_cast<const float*>(input);
-    if (in) {
-        QMutexLocker lock(&rec->m_mutex);
-        for (unsigned long i = 0; i < frameCount; ++i) {
-            float s = in[i];
-            rec->m_buffer.push_back(s);
-            rec->m_buffer.push_back(s);
-        }
-    }
-    return rec->m_recording.load() ? paContinue : paComplete;
-}
-
-void BeatStudioRecorder::run()
-{
-    PaError initErr = Pa_Initialize();
-    if (initErr != paNoError) {
-        qDebug("[BeatStudio] Pa_Initialize failed: %s", Pa_GetErrorText(initErr));
-        return;
-    }
-
-    PaDeviceIndex device = Pa_GetDefaultInputDevice();
-    if (device == paNoDevice) {
-        qDebug("[BeatStudio] No input device");
-        Pa_Terminate();
-        return;
-    }
-
-    const PaDeviceInfo* info = Pa_GetDeviceInfo(device);
-    if (!info) {
-        Pa_Terminate();
-        return;
-    }
-
-    PaStreamParameters inputParams;
-    inputParams.device = device;
-    inputParams.channelCount = 1;
-    inputParams.sampleFormat = paFloat32;
-    inputParams.suggestedLatency = info->defaultLowInputLatency;
-    inputParams.hostApiSpecificStreamInfo = nullptr;
-
-    PaStream* stream = nullptr;
-    PaError err = Pa_OpenStream(&stream, &inputParams, nullptr,
-        m_sampleRate, 256, paNoFlag, paCallback, this);
-
-    if (err != paNoError || !stream) {
-        qDebug("[BeatStudio] Pa_OpenStream failed: %s", Pa_GetErrorText(err));
-        Pa_Terminate();
-        return;
-    }
-
-    err = Pa_StartStream(stream);
-    if (err != paNoError) {
-        Pa_CloseStream(stream);
-        Pa_Terminate();
-        return;
-    }
-
-    qDebug("[BeatStudio] Recording...");
-    while (m_recording.load()) {
-        msleep(50);
-    }
-
-    Pa_StopStream(stream);
-    Pa_CloseStream(stream);
-    Pa_Terminate();
-
-    // Copy buffer
     std::vector<float> data;
     {
         QMutexLocker lock(&m_mutex);
@@ -125,25 +126,24 @@ void BeatStudioRecorder::run()
     }
 
     if (data.empty()) {
-        qDebug("[BeatStudio] No data recorded");
+        qDebug("[BeatStudio] No audio data recorded");
         return;
     }
 
-    // Save WAV
     QString dir = QStandardPaths::writableLocation(QStandardPaths::MusicLocation);
     if (dir.isEmpty()) dir = QDir::homePath();
     QDir().mkpath(dir);
     QString ts = QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss");
-    QString outFile = dir + "/BeatStudio_" + ts + ".wav";
+    m_outputFile = dir + "/BeatStudio_" + ts + ".wav";
 
     const uint32_t numCh = 2;
     const uint32_t bps = 16;
     const uint32_t nSamples = (uint32_t)data.size();
     const uint32_t dataSize = nSamples * (bps / 8);
 
-    QFile f(outFile);
+    QFile f(m_outputFile);
     if (!f.open(QIODevice::WriteOnly)) {
-        qDebug("[BeatStudio] Cannot open file for writing");
+        qDebug("[BeatStudio] Cannot write file: %s", qPrintable(m_outputFile));
         return;
     }
 
@@ -167,9 +167,8 @@ void BeatStudioRecorder::run()
     }
     f.close();
 
-    qDebug("[BeatStudio] Saved to: %s", qPrintable(outFile));
-    m_outputFile = outFile;
-    emit recordingFinished(outFile);
+    qDebug("[BeatStudio] Saved: %s (%zu samples)", qPrintable(m_outputFile), data.size());
+    emit recordingFinished(m_outputFile);
 }
 
 } // namespace lmms::gui
