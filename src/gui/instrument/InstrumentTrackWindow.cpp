@@ -41,6 +41,7 @@
 #include "embed.h"
 #include "Engine.h"
 #include "Plugin.h"
+#include <QTimer>
 #include "FileBrowser.h"
 #include "FileDialog.h"
 #include "GroupBox.h"
@@ -581,13 +582,17 @@ void InstrumentTrackWindow::dropEvent( QDropEvent* event )
 		// Beat Studio: retrieve the subplugin key set during drag (contains VST file path)
 		using PluginKey = Plugin::Descriptor::SubPluginFeatures::Key;
 		PluginKey* dndKey = static_cast<PluginKey*>( Engine::pickDndPluginKey() );
+		QString vstFile = (dndKey && dndKey->isValid() && dndKey->attributes.contains("file"))
+			? dndKey->attributes["file"] : QString();
 		m_track->loadInstrument( value, nullptr, true /* DnD */ );
-		// After loading, if it's a VST with a file path in the key, load that file
-		if( dndKey && dndKey->isValid() && dndKey->attributes.contains("file") )
+		// Delay loadFile so it runs after instrument window is fully set up
+		if( !vstFile.isEmpty() )
 		{
-			Instrument* inst = m_track->instrument();
-			if( inst )
-				inst->loadFile( dndKey->attributes["file"] );
+			InstrumentTrack* track = m_track;
+			QTimer::singleShot( 100, [track, vstFile]() {
+				if( track && track->instrument() )
+					track->instrument()->loadFile( vstFile );
+			});
 		}
 
 		Engine::getSong()->setModified();
