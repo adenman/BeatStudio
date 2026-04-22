@@ -95,11 +95,13 @@ private:
 		QDir dir( base + subPath );
 		// recurse into subdirectories
 		for( const QString& d : dir.entryList( QDir::Dirs | QDir::NoDotAndDotDot ) )
-			scanDir( files, subPath + QDir::separator() + d );
+			scanDir( files, subPath + "/" + d );
 		// collect DLLs
 		for( const QString& f : dir.entryList( QStringList() << "*.dll", QDir::Files ) )
 		{
-			QString full = QDir::toNativeSeparators( base + subPath + "/" + f );
+			QString full = subPath.isEmpty()
+				? QDir::toNativeSeparators( base + f )
+				: QDir::toNativeSeparators( base + subPath + "/" + f );
 			files.append( full );
 		}
 	}
