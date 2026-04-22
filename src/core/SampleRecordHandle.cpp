@@ -73,7 +73,7 @@ void SampleRecordHandle::play( SampleFrame* /*_working_buffer*/ )
 	TimePos len = (tick_t)( m_framesRecorded / Engine::framesPerTick() );
 	if( len > m_minLength )
 	{
-//		m_clip->changeLength( len );
+		m_clip->changeLength( len ); // Beat Studio: update clip length during recording
 		m_minLength = len;
 	}
 }
