@@ -1519,3 +1519,8 @@ lmms--gui--CPULoadWidget {
 	border: none;
 	background: url("resources:cpuload_bg.png");
 }
+
+/* Make sample track taller by default */
+lmms--gui--SampleTrackView {
+	min-height: 60px;
+}
