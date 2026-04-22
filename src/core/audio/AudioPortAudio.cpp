@@ -24,6 +24,7 @@
  */
 
 #include <iostream>
+#include <vector>
 
 #include "lmmsconfig.h"
 
@@ -188,7 +189,7 @@ void AudioPortAudio::stopProcessingImpl()
 	Pa_StopStream(m_paStream);
 }
 
-int AudioPortAudio::processCallback(const void*, void* output, unsigned long frameCount,
+int AudioPortAudio::processCallback(const void* input, void* output, unsigned long frameCount,
 	const PaStreamCallbackTimeInfo*, PaStreamCallbackFlags, void* userData)
 {
 	const auto device = static_cast<AudioPortAudio*>(userData);
@@ -199,6 +200,19 @@ int AudioPortAudio::processCallback(const void*, void* output, unsigned long fra
 	{
 		std::fill_n(outputBuffer, frameCount * channels, 0.f);
 		return paComplete;
+	}
+
+	// Beat Studio: push input frames for audio recording
+	if (input != nullptr)
+	{
+		const auto inputBuffer = reinterpret_cast<const float*>(input);
+		auto inputFrames = std::vector<SampleFrame>(frameCount);
+		for (unsigned long i = 0; i < frameCount; ++i)
+		{
+			inputFrames[i][0] = inputBuffer[i * channels];
+			inputFrames[i][1] = channels > 1 ? inputBuffer[i * channels + 1] : inputBuffer[i * channels];
+		}
+		device->audioEngine()->pushInputFrames(inputFrames.data(), frameCount);
 	}
 
 	device->audioEngine()->renderNextBuffer({outputBuffer, channels, frameCount});
