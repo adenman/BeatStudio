@@ -31,6 +31,9 @@
 
 #include "TrackContainer.h"
 #include "AudioEngine.h"
+#include "Engine.h"
+#include "Plugin.h"
+#include <QTimer>
 #include "DataFile.h"
 #include "MainWindow.h"
 #include "FileBrowser.h"
@@ -393,10 +396,23 @@ void TrackContainerView::dropEvent( QDropEvent * _de )
 	QString value = StringPairDrag::decodeValue( _de );
 	if( type == "instrument" )
 	{
+		// Beat Studio: grab the VST file path from DnD key before thread starts
+		using PluginKey = Plugin::Descriptor::SubPluginFeatures::Key;
+		PluginKey* dndKey = static_cast<PluginKey*>( Engine::pickDndPluginKey() );
+		QString vstFile = (dndKey && dndKey->isValid() && dndKey->attributes.contains("file"))
+			? dndKey->attributes["file"] : QString();
+
 		auto it = dynamic_cast<InstrumentTrack*>(Track::create(Track::Type::Instrument, m_tc));
 		auto ilt = new InstrumentLoaderThread(this, it, value);
 		ilt->start();
-		//it->toggledInstrumentTrackButton( true );
+		// After thread loads instrument, load the VST file
+		if( !vstFile.isEmpty() )
+		{
+			QTimer::singleShot( 500, [it, vstFile]() {
+				if( it && it->instrument() )
+					it->instrument()->loadFile( vstFile );
+			});
+		}
 		_de->accept();
 	}
 	else if( type == "samplefile" || type == "pluginpresetfile"
