@@ -404,15 +404,13 @@ void TrackContainerView::dropEvent( QDropEvent * _de )
 
 		auto it = dynamic_cast<InstrumentTrack*>(Track::create(Track::Type::Instrument, m_tc));
 		auto ilt = new InstrumentLoaderThread(this, it, value);
-		// After thread finishes loading, load the VST file
+		// Connect finished signal with Qt::QueuedConnection to ensure it runs on main thread
 		if( !vstFile.isEmpty() )
 		{
-			QObject::connect( ilt, &QThread::finished, [it, vstFile]() {
-				QTimer::singleShot( 200, [it, vstFile]() {
-					if( it && it->instrument() )
-						it->instrument()->loadFile( vstFile );
-				});
-			});
+			QObject::connect( ilt, &QThread::finished, ilt, [it, vstFile]() {
+				if( it && it->instrument() )
+					it->instrument()->loadFile( vstFile );
+			}, Qt::QueuedConnection );
 		}
 		ilt->start();
 		_de->accept();
