@@ -18,16 +18,20 @@ BeatStudioRecorder::BeatStudioRecorder(QObject* parent)
 
 BeatStudioRecorder::~BeatStudioRecorder()
 {
+    m_recording = false;
     if (isRunning()) {
-        m_recording = false;
         wait(5000);
+        terminate();
     }
 }
 
 void BeatStudioRecorder::startRecording()
 {
     if (isRunning()) return;
-    m_buffer.clear();
+    {
+        QMutexLocker lock(&m_mutex);
+        m_buffer.clear();
+    }
     m_recording = true;
     start();
 }
@@ -35,8 +39,7 @@ void BeatStudioRecorder::startRecording()
 void BeatStudioRecorder::stopRecording()
 {
     m_recording = false;
-    // Don't call wait() here — let the thread finish naturally
-    // The recordingFinished signal will fire when done
+    // Thread will finish naturally and emit recordingFinished
 }
 
 int BeatStudioRecorder::paCallback(const void* input, void* /*output*/,
@@ -52,8 +55,9 @@ int BeatStudioRecorder::paCallback(const void* input, void* /*output*/,
     if (in) {
         QMutexLocker lock(&rec->m_mutex);
         for (unsigned long i = 0; i < frameCount; ++i) {
-            rec->m_buffer.push_back(in[i]);
-            rec->m_buffer.push_back(in[i]); // mono -> stereo
+            float s = in[i];
+            rec->m_buffer.push_back(s);
+            rec->m_buffer.push_back(s);
         }
     }
     return rec->m_recording.load() ? paContinue : paComplete;
@@ -61,17 +65,27 @@ int BeatStudioRecorder::paCallback(const void* input, void* /*output*/,
 
 void BeatStudioRecorder::run()
 {
-    Pa_Initialize();
+    PaError initErr = Pa_Initialize();
+    if (initErr != paNoError) {
+        qDebug("[BeatStudio] Pa_Initialize failed: %s", Pa_GetErrorText(initErr));
+        return;
+    }
 
-    PaStreamParameters inputParams;
-    inputParams.device = Pa_GetDefaultInputDevice();
-    if (inputParams.device == paNoDevice) {
-        qDebug("[BeatStudio] No input device found");
+    PaDeviceIndex device = Pa_GetDefaultInputDevice();
+    if (device == paNoDevice) {
+        qDebug("[BeatStudio] No input device");
         Pa_Terminate();
         return;
     }
 
-    const PaDeviceInfo* info = Pa_GetDeviceInfo(inputParams.device);
+    const PaDeviceInfo* info = Pa_GetDeviceInfo(device);
+    if (!info) {
+        Pa_Terminate();
+        return;
+    }
+
+    PaStreamParameters inputParams;
+    inputParams.device = device;
     inputParams.channelCount = 1;
     inputParams.sampleFormat = paFloat32;
     inputParams.suggestedLatency = info->defaultLowInputLatency;
@@ -81,27 +95,29 @@ void BeatStudioRecorder::run()
     PaError err = Pa_OpenStream(&stream, &inputParams, nullptr,
         m_sampleRate, 256, paNoFlag, paCallback, this);
 
-    if (err != paNoError) {
+    if (err != paNoError || !stream) {
         qDebug("[BeatStudio] Pa_OpenStream failed: %s", Pa_GetErrorText(err));
         Pa_Terminate();
         return;
     }
 
-    Pa_StartStream(stream);
-    qDebug("[BeatStudio] Recording started");
+    err = Pa_StartStream(stream);
+    if (err != paNoError) {
+        Pa_CloseStream(stream);
+        Pa_Terminate();
+        return;
+    }
 
+    qDebug("[BeatStudio] Recording...");
     while (m_recording.load()) {
         msleep(50);
     }
 
-    // Stop and close stream before accessing buffer
     Pa_StopStream(stream);
     Pa_CloseStream(stream);
     Pa_Terminate();
 
-    qDebug("[BeatStudio] Recording stopped, saving WAV...");
-
-    // Copy buffer safely
+    // Copy buffer
     std::vector<float> data;
     {
         QMutexLocker lock(&m_mutex);
@@ -109,53 +125,51 @@ void BeatStudioRecorder::run()
     }
 
     if (data.empty()) {
-        qDebug("[BeatStudio] No audio recorded");
+        qDebug("[BeatStudio] No data recorded");
         return;
     }
 
-    // Write WAV
+    // Save WAV
     QString dir = QStandardPaths::writableLocation(QStandardPaths::MusicLocation);
+    if (dir.isEmpty()) dir = QDir::homePath();
     QDir().mkpath(dir);
-    QString timestamp = QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss");
-    m_outputFile = dir + "/BeatStudio_" + timestamp + ".wav";
+    QString ts = QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss");
+    QString outFile = dir + "/BeatStudio_" + ts + ".wav";
 
-    uint32_t numChannels = 2;
-    uint32_t bitsPerSample = 16;
-    uint32_t numSamples = (uint32_t)data.size();
-    uint32_t dataSize = numSamples * (bitsPerSample / 8);
+    const uint32_t numCh = 2;
+    const uint32_t bps = 16;
+    const uint32_t nSamples = (uint32_t)data.size();
+    const uint32_t dataSize = nSamples * (bps / 8);
 
-    QFile file(m_outputFile);
-    if (!file.open(QIODevice::WriteOnly)) {
-        qDebug("[BeatStudio] Cannot write WAV: %s", qPrintable(m_outputFile));
+    QFile f(outFile);
+    if (!f.open(QIODevice::WriteOnly)) {
+        qDebug("[BeatStudio] Cannot open file for writing");
         return;
     }
 
-    QDataStream ds(&file);
+    QDataStream ds(&f);
     ds.setByteOrder(QDataStream::LittleEndian);
 
-    file.write("RIFF", 4);
+    f.write("RIFF", 4);
     ds << (uint32_t)(36 + dataSize);
-    file.write("WAVE", 4);
-    file.write("fmt ", 4);
-    ds << (uint32_t)16;
-    ds << (uint16_t)1;           // PCM
-    ds << (uint16_t)numChannels;
+    f.write("WAVE", 4);
+    f.write("fmt ", 4);
+    ds << (uint32_t)16 << (uint16_t)1 << (uint16_t)numCh;
     ds << (uint32_t)m_sampleRate;
-    ds << (uint32_t)(m_sampleRate * numChannels * bitsPerSample / 8);
-    ds << (uint16_t)(numChannels * bitsPerSample / 8);
-    ds << (uint16_t)bitsPerSample;
-    file.write("data", 4);
+    ds << (uint32_t)(m_sampleRate * numCh * bps / 8);
+    ds << (uint16_t)(numCh * bps / 8) << (uint16_t)bps;
+    f.write("data", 4);
     ds << dataSize;
 
     for (float s : data) {
-        int16_t sample = static_cast<int16_t>(
-            std::max(-32768.f, std::min(32767.f, s * 32767.f)));
-        ds << sample;
+        int16_t v = (int16_t)(std::max(-32768.f, std::min(32767.f, s * 32767.f)));
+        ds << v;
     }
+    f.close();
 
-    file.close();
-    qDebug("[BeatStudio] Saved: %s", qPrintable(m_outputFile));
-    emit recordingFinished(m_outputFile);
+    qDebug("[BeatStudio] Saved to: %s", qPrintable(outFile));
+    m_outputFile = outFile;
+    emit recordingFinished(outFile);
 }
 
 } // namespace lmms::gui
