@@ -40,6 +40,7 @@
 #include "EffectRackView.h"
 #include "embed.h"
 #include "Engine.h"
+#include "Plugin.h"
 #include "FileBrowser.h"
 #include "FileDialog.h"
 #include "GroupBox.h"
@@ -577,7 +578,17 @@ void InstrumentTrackWindow::dropEvent( QDropEvent* event )
 
 	if( type == "instrument" )
 	{
-		m_track->loadInstrument( value, nullptr, true /* DnD */ );
+		// Beat Studio: retrieve the subplugin key set during drag (contains VST file path)
+		using PluginKey = Plugin::Descriptor::SubPluginFeatures::Key;
+		PluginKey* dndKey = static_cast<PluginKey*>( Engine::getDndPluginKey() );
+		if( dndKey && dndKey->isValid() )
+		{
+			m_track->loadInstrument( value, dndKey );
+		}
+		else
+		{
+			m_track->loadInstrument( value, nullptr, true /* DnD */ );
+		}
 
 		Engine::getSong()->setModified();
 
