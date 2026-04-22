@@ -585,11 +585,15 @@ void InstrumentTrackWindow::dropEvent( QDropEvent* event )
 		QString vstFile = (dndKey && dndKey->isValid() && dndKey->attributes.contains("file"))
 			? dndKey->attributes["file"] : QString();
 		m_track->loadInstrument( value, nullptr, true /* DnD */ );
-		// Delay loadFile so it runs after instrument window is fully set up
+		// Beat Studio: load the VST file into the VeSTige instrument
 		if( !vstFile.isEmpty() )
 		{
 			InstrumentTrack* track = m_track;
-			QTimer::singleShot( 100, [track, vstFile]() {
+			// Try immediate load first
+			if( track->instrument() )
+				track->instrument()->loadFile( vstFile );
+			// Also schedule delayed load as fallback
+			QTimer::singleShot( 500, [track, vstFile]() {
 				if( track && track->instrument() )
 					track->instrument()->loadFile( vstFile );
 			});
