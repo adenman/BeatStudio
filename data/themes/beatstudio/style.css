@@ -953,3 +953,546 @@ lmms--gui--LmmsPalette {
 	qproperty-highlight: #ff8c00;
 	qproperty-highlightedText: #000000;
 }
+
+/* ==========================================
+   BEAT STUDIO - FL STUDIO ENHANCED UI
+   ========================================== */
+
+/* MDI Area - FL's dark workspace background */
+QMdiArea {
+	background-color: #141414;
+	background-image: none;
+}
+
+/* MenuBar - FL style dark top bar */
+QMenuBar {
+	background: #1e1e1e;
+	color: #cccccc;
+	border-bottom: 1px solid #111111;
+	padding: 2px 4px;
+	font-size: 11px;
+}
+
+QMenuBar::item {
+	background: transparent;
+	padding: 3px 8px;
+	border-radius: 2px;
+}
+
+QMenuBar::item:selected {
+	background: #333333;
+	color: #ff8c00;
+}
+
+QMenuBar::item:pressed {
+	background: #ff8c00;
+	color: #000000;
+}
+
+/* Subwindows - FL style colored title bars */
+lmms--gui--SubWindow {
+	color: qlineargradient(spread:reflect, x1:0, y1:0, x2:0, y2:1,
+		stop:0 #0a0a0a, stop:0.05 #2a2a2a, stop:1 #1e1e1e);
+	qproperty-activeColor: qlineargradient(spread:reflect, x1:0, y1:0, x2:0, y2:1,
+		stop:0 #0a0a0a, stop:0.05 #3a3a3a, stop:1 #252525);
+	qproperty-textShadowColor: #000;
+	qproperty-borderColor: #ff8c00;
+}
+
+lmms--gui--SubWindow > QLabel {
+	color: #e0e0e0;
+	font-size: 11px;
+	font-weight: bold;
+	font-family: "Segoe UI", Arial, sans-serif;
+}
+
+/* Pattern Editor / Channel Rack - FL style */
+lmms--gui--PatternEditor {
+	background-color: #1e1e1e;
+}
+
+lmms--gui--PatternEditor QWidget {
+	background-color: #222222;
+}
+
+/* Track rows in pattern editor - alternating like FL */
+lmms--gui--TrackView {
+	background-color: #252525;
+	border-bottom: 1px solid #1a1a1a;
+	min-height: 32px;
+	max-height: 32px;
+}
+
+lmms--gui--TrackView:hover {
+	background-color: #2a2a2a;
+}
+
+/* Track label area - FL style wider left panel */
+lmms--gui--TrackLabelButton {
+	background-color: #2e2e2e;
+	border: none;
+	border-right: 1px solid #111111;
+	font-size: 10px;
+	font-weight: bold;
+	padding: 2px 2px 2px 8px;
+	color: #e0e0e0;
+	min-width: 140px;
+	max-width: 140px;
+}
+
+lmms--gui--TrackLabelButton:hover {
+	background: #363636;
+	border-right: 1px solid #ff8c00;
+}
+
+lmms--gui--TrackLabelButton:checked {
+	border-left: 3px solid #ff8c00;
+	background: #222222;
+}
+
+/* Song Editor tracks - FL Playlist style */
+lmms--gui--SongEditor {
+	background-color: #141414;
+}
+
+lmms--gui--TrackContainerView QFrame {
+	background-color: #1e1e1e;
+}
+
+lmms--gui--TrackContainerView QWidget {
+	background-color: #1e1e1e;
+}
+
+lmms--gui--TrackView > QWidget {
+	background-color: #252525;
+}
+
+/* Track content / clip area */
+lmms--gui--TrackContentWidget {
+	qproperty-darkerColor: #141414;
+	qproperty-lighterColor: #1a1a1a;
+	qproperty-coarseGridColor: #2a2a2a;
+	qproperty-fineGridColor: #1e1e1e;
+	qproperty-horizontalColor: #2a2a2a;
+	qproperty-embossColor: rgba(0,0,0,0);
+	qproperty-coarseGridWidth: 1;
+	qproperty-fineGridWidth: 1;
+	qproperty-horizontalWidth: 1;
+	qproperty-embossWidth: 0;
+	qproperty-embossOffset: 0;
+}
+
+/* Clips - FL style orange/colored */
+lmms--gui--ClipView {
+	qproperty-mutedColor: rgba(255,255,255,60);
+	qproperty-mutedBackgroundColor: #282828;
+	qproperty-selectedColor: #7a4400;
+	qproperty-patternClipBackground: #2a2a2a;
+	qproperty-textColor: #fff;
+	qproperty-textBackgroundColor: rgba(0,0,0,120);
+	qproperty-textShadowColor: rgba(0,0,0,220);
+	qproperty-gradient: true;
+	qproperty-markerColor: rgb(0,0,0);
+	font-size: 10px;
+	font-weight: bold;
+}
+
+lmms--gui--MidiClipView {
+	background-color: #d07000;
+	color: rgba(255,255,255,230);
+	qproperty-noteFillColor: rgba(255,255,255,230);
+	qproperty-noteBorderColor: rgb(180,90,0);
+	qproperty-mutedNoteFillColor: rgba(80,80,80,200);
+	qproperty-mutedNoteBorderColor: rgb(50,50,50);
+	qproperty-gradient: true;
+}
+
+lmms--gui--PatternClipView {
+	background-color: #c06800;
+	qproperty-emptyTrackHeightRatio: 0.5;
+	qproperty-verticalPadding: 0.1;
+	qproperty-noteVerticalSpacing: 0.1;
+	qproperty-noteHorizontalSpacing: 0.1;
+	qproperty-noteColor: #ffffff;
+	qproperty-gradient: true;
+}
+
+lmms--gui--SampleClipView {
+	background-color: #1a3a5a;
+	color: #6ab4ff;
+	qproperty-gradient: true;
+}
+
+lmms--gui--AutomationClipView {
+	background-color: #5a2aaa;
+	color: rgba(255,255,255,90);
+	qproperty-gradient: true;
+}
+
+/* Mixer - FL style */
+lmms--gui--MixerView {
+	background-color: #1a1a1a;
+}
+
+lmms--gui--MixerChannelView {
+	background: #1e1e1e;
+	color: #e0e0e0;
+	qproperty-backgroundActive: #2a2000;
+	qproperty-strokeOuterActive: #ff8c00;
+	qproperty-strokeOuterInactive: #222222;
+	qproperty-strokeInnerActive: #ff8c00;
+	qproperty-strokeInnerInactive: #1a1a1a;
+}
+
+lmms--gui--MixerChannelView QGraphicsView {
+	background: transparent;
+	border-style: none;
+}
+
+lmms--gui--PeakIndicator {
+	background-color: #0a0a0a;
+	font-size: 7pt;
+}
+
+lmms--gui--Fader {
+	qproperty-peakOk: #5acd3e;
+	qproperty-peakWarn: #ffcc00;
+	qproperty-peakClip: #ff2020;
+}
+
+/* Mixer buttons */
+lmms--gui--MixerView QPushButton {
+	font-size: 9px;
+	background: #2a2a2a;
+	border: 1px solid #111;
+	border-radius: 2px;
+	color: #cccccc;
+	padding: 2px 6px;
+}
+
+lmms--gui--MixerView QPushButton:hover {
+	background: #3a3a3a;
+	border: 1px solid #ff8c00;
+	color: #ff8c00;
+}
+
+lmms--gui--MixerView QPushButton:pressed {
+	background: #ff8c00;
+	color: #000;
+}
+
+/* Piano Roll - FL style */
+lmms--gui--PianoRoll {
+	background-color: #141414;
+	qproperty-backgroundShade: rgba(255,255,255,6);
+	qproperty-noteModeColor: #ff8c00;
+	qproperty-noteColor: #ff8c00;
+	qproperty-stepNoteColor: #aa1111;
+	qproperty-currentStepNoteColor: rgb(255,50,140);
+	qproperty-noteTextColor: #ffffff;
+	qproperty-noteOpacity: 200;
+	qproperty-noteBorders: true;
+	qproperty-selectedNoteColor: #7a4400;
+	qproperty-ghostNoteColor: #2a2a2a;
+	qproperty-ghostNoteTextColor: #ffffff;
+	qproperty-ghostNoteOpacity: 120;
+	qproperty-ghostNoteBorders: true;
+	qproperty-barColor: #c07000;
+	qproperty-markedSemitoneColor: rgba(255,255,255,15);
+	qproperty-knifeCutLine: rgba(255,50,0,255);
+	qproperty-whiteKeyWidth: 64;
+	qproperty-whiteKeyActiveTextColor: #000;
+	qproperty-whiteKeyActiveTextShadow: #fff;
+	qproperty-whiteKeyActiveBackground: qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #e87c00,stop:1 #ff8c00);
+	qproperty-whiteKeyInactiveTextColor: #333;
+	qproperty-whiteKeyInactiveTextShadow: #888;
+	qproperty-whiteKeyInactiveBackground: qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #c8c8c8,stop:1 #dcdcdc);
+	qproperty-whiteKeyDisabledBackground: qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #808080,stop:1 #909090);
+	qproperty-blackKeyWidth: 44;
+	qproperty-blackKeyActiveBackground: qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #e87c00,stop:1 #ff8c00);
+	qproperty-blackKeyInactiveBackground: qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #141414,stop:1 #1e1e1e);
+	qproperty-blackKeyDisabledBackground: qlineargradient(x1:0,y1:0,x2:1,y2:0,stop:0 #404040,stop:1 #303030);
+	qproperty-lineColor: #222222;
+	qproperty-beatLineColor: #3a2800;
+	qproperty-barLineColor: #a06000;
+	qproperty-textColor: #000;
+	qproperty-textColorLight: #ff8c00;
+	qproperty-textShadow: #fff;
+}
+
+lmms--gui--PianoView {
+	background-color: #111111;
+}
+
+/* Timeline */
+lmms--gui--TimeLineWidget {
+	font-size: 7pt;
+	min-height: 1.5em;
+	max-height: 1.5em;
+	background-color: #1a1a1a;
+	qproperty-inactiveLoopColor: #2a2a2a;
+	qproperty-inactiveLoopBrush: #2a2a2a;
+	qproperty-inactiveLoopInnerColor: #2a2a2a;
+	qproperty-inactiveLoopHandleColor: rgba(180,180,180,80);
+	qproperty-activeLoopColor: #ff8c00;
+	qproperty-activeLoopBrush: rgba(255,140,0,60);
+	qproperty-activeLoopInnerColor: #e87c00;
+	qproperty-activeLoopHandleColor: rgba(255,180,80,220);
+	qproperty-loopRectangleVerticalPadding: 1;
+	qproperty-loopHandleWidth: 8;
+	qproperty-barLineColor: rgb(80,80,80);
+	qproperty-barNumberColor: rgb(140,140,140);
+}
+
+/* Main toolbar - FL style prominent transport */
+QWidget#mainToolbar {
+	background: qlineargradient(x1:0,y1:0,x2:0,y2:1,
+		stop:0 #282828, stop:0.5 #1e1e1e, stop:1 #161616);
+	border-bottom: 3px solid #ff8c00;
+	min-height: 58px;
+	padding: 4px 8px;
+}
+
+/* Transport/tool buttons */
+QToolBar {
+	background: qlineargradient(x1:0,y1:0,x2:0,y2:1,
+		stop:0 #282828, stop:1 #1e1e1e);
+	border: none;
+	border-bottom: 1px solid #111;
+	padding: 2px;
+	spacing: 1px;
+}
+
+QToolButton, QToolButton::menu-button {
+	margin: 1px;
+	padding: 3px 5px;
+	border: 1px solid #333;
+	border-radius: 3px;
+	background: qlineargradient(x1:0,y1:0,x2:0,y2:1,
+		stop:0 #323232, stop:1 #222222);
+	font-size: 10px;
+	color: #cccccc;
+}
+
+QToolButton:hover {
+	border: 1px solid #ff8c00;
+	background: qlineargradient(x1:0,y1:0,x2:0,y2:1,
+		stop:0 #3c3c3c, stop:1 #2c2c2c);
+	color: #ff8c00;
+}
+
+QToolButton:pressed {
+	background: qlineargradient(x1:0,y1:0,x2:0,y2:1,
+		stop:0 #ff8c00, stop:1 #c06000);
+	color: #000;
+	border: 1px solid #c06000;
+}
+
+QToolButton:checked {
+	background: qlineargradient(x1:0,y1:0,x2:0,y2:1,
+		stop:0 #1a1a1a, stop:1 #111111);
+	border: 1px solid #ff8c00;
+	color: #ff8c00;
+}
+
+/* Scrollbars - thinner FL style */
+QScrollBar:horizontal {
+	border: none;
+	background: #1a1a1a;
+	height: 8px;
+	margin: 0;
+}
+
+QScrollBar:vertical {
+	border: none;
+	background: #1a1a1a;
+	width: 8px;
+	margin: 0;
+}
+
+QScrollBar::handle:horizontal,
+QScrollBar::handle:vertical {
+	background: #444444;
+	border-radius: 4px;
+	min-width: 20px;
+	min-height: 20px;
+}
+
+QScrollBar::handle:horizontal:hover,
+QScrollBar::handle:vertical:hover {
+	background: #ff8c00;
+}
+
+QScrollBar::add-line, QScrollBar::sub-line {
+	width: 0;
+	height: 0;
+	background: none;
+	border: none;
+}
+
+QScrollBar::add-page, QScrollBar::sub-page {
+	background: none;
+}
+
+/* Plugin browser - FL style */
+lmms--gui--PluginDescWidget {
+	border-bottom: 1px solid #111;
+	border-radius: 0;
+	background-color: #222222;
+	color: #cccccc;
+	font-size: 10px;
+	padding: 3px 6px;
+	margin: 0;
+}
+
+lmms--gui--PluginDescWidget:hover {
+	background: #2e2e2e;
+	color: #ff8c00;
+	border-left: 3px solid #ff8c00;
+}
+
+/* Sidebar - FL browser panel */
+lmms--gui--SideBar {
+	background: #1a1a1a;
+	border-right: 1px solid #111;
+}
+
+lmms--gui--SideBar QToolButton {
+	background: none;
+	border: none;
+	color: #888888;
+	font-size: 11px;
+	padding: 6px;
+}
+
+lmms--gui--SideBar QToolButton:hover {
+	color: #ff8c00;
+	background: rgba(255,140,0,10%);
+}
+
+lmms--gui--SideBar QToolButton:checked {
+	background: #252525;
+	color: #ff8c00;
+	border-left: 2px solid #ff8c00;
+}
+
+/* Knobs - FL style */
+lmms--gui--Knob {
+	qproperty-lineInactiveColor: rgb(80,80,80);
+	qproperty-arcInactiveColor: rgba(80,80,80,60);
+}
+
+/* LCD displays - FL style green on black */
+lmms--gui--LcdWidget {
+	background-color: #0a0a0a;
+	color: #ff8c00;
+}
+
+/* Oscilloscope */
+lmms--gui--Oscilloscope {
+	background: none;
+	border: none;
+	qproperty-leftChannelColor: rgb(255,140,0);
+	qproperty-rightChannelColor: rgb(255,200,80);
+	qproperty-otherChannelsColor: rgb(200,100,0);
+	qproperty-clippingColor: rgb(255,30,30);
+}
+
+/* Tab widget */
+lmms--gui--TabWidget {
+	background-color: #222222;
+	qproperty-tabText: rgba(255,255,255,140);
+	qproperty-tabTitleText: #fff;
+	qproperty-tabSelected: #5a3800;
+	qproperty-tabTextSelected: rgba(255,255,255,255);
+	qproperty-tabBackground: #161616;
+	qproperty-tabBorder: #111111;
+}
+
+/* Tooltips */
+QToolTip {
+	border-radius: 2px;
+	background: #0a0a0a;
+	color: #e0e0e0;
+	border: 1px solid #ff8c00;
+	padding: 2px 4px;
+	font-size: 10px;
+}
+
+/* Line edits */
+QLineEdit {
+	border-radius: 2px;
+	border: 1px solid #333;
+	background: #0f0f0f;
+	color: #e0e0e0;
+	padding: 1px 4px;
+	selection-background-color: #b86400;
+}
+
+QLineEdit:focus {
+	border: 1px solid #ff8c00;
+}
+
+/* Menus */
+QMenu {
+	border: 1px solid #333;
+	border-top: 2px solid #ff8c00;
+	background-color: #1e1e1e;
+}
+
+QMenu::item {
+	color: #d0d0d0;
+	padding: 4px 32px 4px 20px;
+	font-size: 10px;
+}
+
+QMenu::item:selected {
+	background-color: #2a2a2a;
+	color: #ff8c00;
+}
+
+QMenu::separator {
+	height: 1px;
+	background: #2a2a2a;
+	margin: 2px 0;
+}
+
+/* Position/playback line - bright orange */
+lmms--gui--PositionLine {
+	qproperty-tailGradient: true;
+	qproperty-lineColor: rgb(255,140,0);
+	qproperty-recordingColor: rgb(255,40,40);
+}
+
+/* Automation editor */
+lmms--gui--AutomationEditor {
+	color: #ffffff;
+	background-color: #141414;
+	qproperty-backgroundShade: rgba(255,255,255,8);
+	qproperty-nodeInValueColor: rgba(255,140,0,180);
+	qproperty-nodeOutValueColor: rgba(180,40,40,160);
+	qproperty-nodeTangentLineColor: rgba(200,200,200,255);
+	qproperty-crossColor: rgba(255,180,80,160);
+	qproperty-lineColor: #222222;
+	qproperty-beatLineColor: #5a3800;
+	qproperty-barLineColor: #a06000;
+	qproperty-graphColor: rgba(255,140,0,120);
+	qproperty-scaleColor: #1e1e1e;
+	qproperty-ghostNoteColor: rgba(200,200,200,80);
+	qproperty-detuningNoteColor: rgba(255,50,50,125);
+	qproperty-ghostSampleColor: rgba(100,100,100,100);
+}
+
+/* Palette */
+lmms--gui--LmmsPalette {
+	qproperty-background: #222222;
+	qproperty-windowText: #ff8c00;
+	qproperty-base: #0f0f0f;
+	qproperty-text: #e0e0e0;
+	qproperty-button: #2e2e2e;
+	qproperty-shadow: rgb(0,0,0);
+	qproperty-buttonText: #e0e0e0;
+	qproperty-brightText: #e0e0e0;
+	qproperty-highlight: #ff8c00;
+	qproperty-highlightedText: #000000;
+}
