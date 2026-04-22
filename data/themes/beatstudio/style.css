@@ -2,6 +2,11 @@
  * Beat Studio - FL Style *
  **************************/
 
+/* Global font size */
+* {
+	font-size: 12px;
+}
+
 /* FL Studio color palette:
    Background:    #1a1a1a / #222222
    Panel:         #2b2b2b / #333333
@@ -51,7 +56,7 @@ QMdiArea {
 
 lmms--gui--FileBrowser QCheckBox
 {
-	font-size: 8pt;
+	font-size: 9pt;
 	color: white;
 }
 
@@ -479,7 +484,7 @@ QPushButton#btn-solo:checked {
 }
 
 lmms--gui--Sf2InstrumentView > QLabel {
-	font-size:10px;
+	font-size: 12px;
 }
 
 lmms--gui--AutomatableSlider::groove:vertical {
@@ -569,7 +574,7 @@ QToolButton, QToolButton::menu-button {
 	border-bottom: 1px solid #111111;
 	border-radius: 3px;
 	background: qlineargradient(spread:reflect, x1:0, y1:0, x2:0, y2:1, stop:0 #3a3a3a, stop:1 #252525);
-	font-size: 10px;
+	font-size: 12px;
 	color: #e0e0e0;
 }
 
@@ -618,7 +623,7 @@ QToolButton::menu-button {
 lmms--gui--TrackLabelButton {
 	background-color: #333333;
 	border: 1px solid #333333;
-	font-size: 11px;
+	font-size: 13px;
 	font-weight: normal;
 	padding: 2px 1px;
 	color: #e0e0e0;
@@ -657,27 +662,27 @@ lmms--gui--SideBar {
 lmms--gui--SideBar QToolButton {
 	background: none;
 	border: none;
-	font-size: 12px;
+	font-size: 14px;
 	color: #999999;
 }
 
 lmms--gui--SideBar QToolButton:hover {
 	background: none;
 	border: none;
-	font-size: 12px;
+	font-size: 14px;
 	color: #ff8c00;
 }
 
 lmms--gui--SideBar QToolButton:pressed {
 	background: none;
 	border: none;
-	font-size: 12px;
+	font-size: 14px;
 }
 
 lmms--gui--SideBar QToolButton:checked {
 	background: qlineargradient(spread:reflect, x1:0, y1:0, x2:0, y2:1, stop:0 #3a3a3a, stop:1 #252525);
 	border: none;
-	font-size: 12px;
+	font-size: 14px;
 	color: #ff8c00;
 }
 
@@ -704,7 +709,7 @@ lmms--gui--PianoView {
 lmms--gui--MixerView QPushButton,
 lmms--gui--EffectRackView QPushButton,
 lmms--gui--ControllerRackView QPushButton {
-	font-size: 10px;
+	font-size: 12px;
 }
 
 lmms--gui--MixerChannelView {
@@ -724,7 +729,7 @@ lmms--gui--MixerChannelView QGraphicsView {
 
 lmms--gui--PeakIndicator {
 	background-color: #0f0f0f;
-	font-size: 7pt;
+	font-size: 8pt;
 }
 
 lmms--gui--Fader {
@@ -734,7 +739,7 @@ lmms--gui--Fader {
 }
 
 lmms--gui--TimeLineWidget {
-	font-size: 7pt;
+	font-size: 8pt;
 	min-height: 1.5em;
 	max-height: 1.5em;
 	qproperty-inactiveLoopColor: #333333;
@@ -781,7 +786,7 @@ lmms--gui--ClipView {
 	qproperty-textShadowColor: rgba(0,0,0,200);
 	qproperty-gradient: false;
 	qproperty-markerColor: rgb(0,0,0);
-	font-size: 11px;
+	font-size: 13px;
 }
 
 /* MIDI clip — orange like FL */
@@ -825,7 +830,7 @@ lmms--gui--SubWindow {
 
 lmms--gui--SubWindow > QLabel {
 	color: #e0e0e0;
-	font-size: 12px;
+	font-size: 14px;
 	font-style: normal;
 }
 
@@ -970,7 +975,7 @@ QMenuBar {
 	color: #cccccc;
 	border-bottom: 1px solid #111111;
 	padding: 2px 4px;
-	font-size: 11px;
+	font-size: 13px;
 }
 
 QMenuBar::item {
@@ -1001,7 +1006,7 @@ lmms--gui--SubWindow {
 
 lmms--gui--SubWindow > QLabel {
 	color: #e0e0e0;
-	font-size: 11px;
+	font-size: 13px;
 	font-weight: bold;
 	font-family: "Segoe UI", Arial, sans-serif;
 }
@@ -1032,7 +1037,7 @@ lmms--gui--TrackLabelButton {
 	background-color: #2e2e2e;
 	border: none;
 	border-right: 1px solid #111111;
-	font-size: 10px;
+	font-size: 12px;
 	font-weight: bold;
 	padding: 2px 2px 2px 8px;
 	color: #e0e0e0;
@@ -1093,7 +1098,7 @@ lmms--gui--ClipView {
 	qproperty-textShadowColor: rgba(0,0,0,220);
 	qproperty-gradient: true;
 	qproperty-markerColor: rgb(0,0,0);
-	font-size: 10px;
+	font-size: 12px;
 	font-weight: bold;
 }
 
@@ -1151,7 +1156,7 @@ lmms--gui--MixerChannelView QGraphicsView {
 
 lmms--gui--PeakIndicator {
 	background-color: #0a0a0a;
-	font-size: 7pt;
+	font-size: 8pt;
 }
 
 lmms--gui--Fader {
@@ -1162,7 +1167,7 @@ lmms--gui--Fader {
 
 /* Mixer buttons */
 lmms--gui--MixerView QPushButton {
-	font-size: 9px;
+	font-size: 11px;
 	background: #2a2a2a;
 	border: 1px solid #111;
 	border-radius: 2px;
@@ -1226,7 +1231,7 @@ lmms--gui--PianoView {
 
 /* Timeline */
 lmms--gui--TimeLineWidget {
-	font-size: 7pt;
+	font-size: 8pt;
 	min-height: 1.5em;
 	max-height: 1.5em;
 	background-color: #1a1a1a;
@@ -1270,7 +1275,7 @@ QToolButton, QToolButton::menu-button {
 	border-radius: 3px;
 	background: qlineargradient(x1:0,y1:0,x2:0,y2:1,
 		stop:0 #323232, stop:1 #222222);
-	font-size: 10px;
+	font-size: 12px;
 	color: #cccccc;
 }
 
@@ -1340,7 +1345,7 @@ lmms--gui--PluginDescWidget {
 	border-radius: 0;
 	background-color: #222222;
 	color: #cccccc;
-	font-size: 10px;
+	font-size: 12px;
 	padding: 3px 6px;
 	margin: 0;
 }
@@ -1361,7 +1366,7 @@ lmms--gui--SideBar QToolButton {
 	background: none;
 	border: none;
 	color: #888888;
-	font-size: 11px;
+	font-size: 13px;
 	padding: 6px;
 }
 
@@ -1416,7 +1421,7 @@ QToolTip {
 	color: #e0e0e0;
 	border: 1px solid #ff8c00;
 	padding: 2px 4px;
-	font-size: 10px;
+	font-size: 12px;
 }
 
 /* Line edits */
@@ -1443,7 +1448,7 @@ QMenu {
 QMenu::item {
 	color: #d0d0d0;
 	padding: 4px 32px 4px 20px;
-	font-size: 10px;
+	font-size: 12px;
 }
 
 QMenu::item:selected {
