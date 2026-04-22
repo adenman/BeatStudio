@@ -25,6 +25,7 @@
  
 #include "SampleTrack.h"
 
+#include <QDebug>
 #include <QDomElement>
 
 #include "EffectChain.h"
@@ -137,6 +138,8 @@ bool SampleTrack::play( const TimePos & _start, const f_cnt_t _frames,
 	for (const auto& clip : clips)
 	{
 		auto st = dynamic_cast<SampleClip*>(clip);
+		qDebug("[BeatStudio] SampleTrack::play clip=%p isRecord=%d songRecording=%d muted=%d",
+			(void*)st, st->isRecord(), Engine::getSong()->isRecording(), st->isMuted());
 		if( !st->isMuted() )
 		{
 			PlayHandle* handle;
@@ -144,6 +147,7 @@ bool SampleTrack::play( const TimePos & _start, const f_cnt_t _frames,
 			{
 				if( !Engine::getSong()->isRecording() )
 				{
+					qDebug("[BeatStudio] SampleTrack: song not recording, skipping");
 					return played_a_note;
 				}
 				auto smpHandle = new SampleRecordHandle(st);
