@@ -204,12 +204,7 @@ VestigeInstrument::VestigeInstrument( InstrumentTrack * _instrument_track,
 	knobFModel( nullptr ),
 	p_subWindow( nullptr )
 {
-	// Beat Studio: auto-load VST from subplugin key (instrument browser drag)
-	const auto& k = key();
-	if( k.isValid() && k.attributes.contains("file") )
-	{
-		loadFile( k.attributes["file"] );
-	}
+	// Beat Studio: auto-load VST from subplugin key is handled via QTimer in drop handler
 
 	// now we need a play-handle which cares for calling play()
 	auto iph = new InstrumentPlayHandle(this, _instrument_track);
