@@ -542,13 +542,7 @@ lmms--gui--EffectControlDialog QGroupBox::title {
 	padding: 2px 1px;
 }
 
-/* Main toolbar — FL Studio style dark bar with orange accent */
-QWidget#mainToolbar {
-	background: qlineargradient(spread:reflect, x1:0, y1:0, x2:0, y2:1, stop:0 #2e2e2e, stop:1 #1a1a1a);
-	border-bottom: 3px solid #ff8c00;
-	min-height: 54px;
-	padding: 4px;
-}
+/* Main toolbar - see FL style section below */
 
 QToolBar {
 	background: qlineargradient(spread:reflect, x1:0, y1:0, x2:0, y2:1, stop:0 #303030, stop:1 #1e1e1e);
@@ -1495,4 +1489,34 @@ lmms--gui--LmmsPalette {
 	qproperty-brightText: #e0e0e0;
 	qproperty-highlight: #ff8c00;
 	qproperty-highlightedText: #000000;
+}
+
+/* Fix toolbar label alignment */
+QWidget#mainToolbar QLabel {
+	color: #aaaaaa;
+	font-size: 9px;
+	padding: 0px;
+	margin: 0px;
+}
+
+/* Fix toolbar bottom border position - use padding instead */
+QWidget#mainToolbar {
+	border-bottom: none;
+	border-top: none;
+	padding-bottom: 3px;
+	background: qlineargradient(x1:0,y1:0,x2:0,y2:1,
+		stop:0 #282828, stop:0.6 #1e1e1e, stop:1 #ff8c00);
+}
+
+/* LCD displays in toolbar */
+lmms--gui--LcdWidget {
+	background-color: #0a0f0a;
+	color: #00cc44;
+	font-size: 11px;
+}
+
+/* CPU load widget */
+lmms--gui--CPULoadWidget {
+	border: none;
+	background: url("resources:cpuload_bg.png");
 }
