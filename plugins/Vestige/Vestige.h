@@ -60,7 +60,7 @@ class VestigeInstrument : public Instrument
 	Q_OBJECT
 public:
 	VestigeInstrument( InstrumentTrack * _instrument_track,
-		Plugin::Descriptor::SubPluginFeatures::Key * key = nullptr );
+		Plugin::Descriptor::SubPluginFeatures::Key * pluginKey = nullptr );
 	virtual ~VestigeInstrument();
 
 	virtual void play( SampleFrame* _working_buffer );

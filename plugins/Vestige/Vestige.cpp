@@ -195,8 +195,8 @@ private:
 
 
 VestigeInstrument::VestigeInstrument( InstrumentTrack * _instrument_track,
-	Plugin::Descriptor::SubPluginFeatures::Key * key ) :
-	Instrument(_instrument_track, &vestige_plugin_descriptor, key, Flag::IsSingleStreamed | Flag::IsMidiBased),
+	Plugin::Descriptor::SubPluginFeatures::Key * pluginKey ) :
+	Instrument(_instrument_track, &vestige_plugin_descriptor, pluginKey, Flag::IsSingleStreamed | Flag::IsMidiBased),
 	m_plugin( nullptr ),
 	m_pluginMutex(),
 	m_subWindow( nullptr ),
