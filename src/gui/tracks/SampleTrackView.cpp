@@ -123,7 +123,10 @@ SampleTrackView::SampleTrackView( SampleTrack * _t, TrackContainerView* tcv ) :
 		// If no clips exist and we're arming, create one at position 0
 		if (checked && !foundClip) {
 			auto* sc = dynamic_cast<SampleClip*>(_t->createClip(TimePos(0)));
-			if (sc) sc->setRecord(true);
+			if (sc) {
+				_t->addClip(sc); // Beat Studio: must add to track's clip list
+				sc->setRecord(true);
+			}
 		}
 	});
 	layout->addWidget(m_recordButton);
