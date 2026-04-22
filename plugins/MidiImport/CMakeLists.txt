@@ -1,8 +1,3 @@
-if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/portsmf/include/allegro.h")
-	message(WARNING "portsmf submodule not found, skipping MidiImport.")
-	return()
-endif()
-
 INCLUDE(BuildPlugin)
 
 IF (NOT MSVC)
