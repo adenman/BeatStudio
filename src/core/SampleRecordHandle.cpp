@@ -24,7 +24,6 @@
 
 
 #include "SampleRecordHandle.h"
-#include <QDebug>
 #include "AudioEngine.h"
 #include "Engine.h"
 #include "PatternTrack.h"
@@ -68,12 +67,6 @@ void SampleRecordHandle::play( SampleFrame* /*_working_buffer*/ )
 {
 	const SampleFrame* recbuf = Engine::audioEngine()->inputBuffer();
 	const f_cnt_t frames = Engine::audioEngine()->inputBufferFrames();
-	// Debug: print every 100 calls
-	static int callCount = 0;
-	if (++callCount % 100 == 0) {
-		qDebug("[BeatStudio] SampleRecordHandle::play called, frames=%d, total=%lld", 
-			frames, (long long)m_framesRecorded);
-	}
 	writeBuffer( recbuf, frames );
 	m_framesRecorded += frames;
 

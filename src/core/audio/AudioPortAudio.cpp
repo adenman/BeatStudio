@@ -25,7 +25,6 @@
 
 #include <iostream>
 #include <vector>
-#include <QDebug>
 
 #include "lmmsconfig.h"
 
@@ -223,10 +222,8 @@ int AudioPortAudio::processCallback(const void* input, void* output, unsigned lo
 
 	// Beat Studio: push input frames for audio recording
 	// Input is typically mono from a mic - read as 1 channel and duplicate
-	static int dbgCount = 0;
 	if (input != nullptr)
 	{
-		if (++dbgCount % 500 == 0) qDebug("[BeatStudio] PortAudio: got input frames, count=%lu", frameCount);
 		const auto inputBuffer = reinterpret_cast<const float*>(input);
 		auto inputFrames = std::vector<SampleFrame>(frameCount);
 		for (unsigned long i = 0; i < frameCount; ++i)

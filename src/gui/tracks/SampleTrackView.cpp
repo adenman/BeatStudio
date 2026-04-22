@@ -58,7 +58,6 @@ SampleTrackView::SampleTrackView( SampleTrack * _t, TrackContainerView* tcv ) :
 	TrackView( _t, tcv )
 {
 	setMinimumHeight( 56 );
-	resize( width(), _t->getHeight() > 56 ? _t->getHeight() : 56 );
 
 	m_tlb = new TrackLabelButton(this, getTrackSettingsWidget());
 	m_tlb->setCheckable(true);
