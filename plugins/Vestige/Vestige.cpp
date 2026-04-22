@@ -99,7 +99,7 @@ private:
 		// collect DLLs
 		for( const QString& f : dir.entryList( QStringList() << "*.dll", QDir::Files ) )
 		{
-			QString full = base + subPath + QDir::separator() + f;
+			QString full = QDir::toNativeSeparators( base + subPath + "/" + f );
 			files.append( full );
 		}
 	}

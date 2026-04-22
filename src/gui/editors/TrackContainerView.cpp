@@ -408,7 +408,7 @@ void TrackContainerView::dropEvent( QDropEvent * _de )
 		// After thread loads instrument, load the VST file
 		if( !vstFile.isEmpty() )
 		{
-			QTimer::singleShot( 500, [it, vstFile]() {
+			QTimer::singleShot( 1000, [it, vstFile]() {
 				if( it && it->instrument() )
 					it->instrument()->loadFile( vstFile );
 			});
