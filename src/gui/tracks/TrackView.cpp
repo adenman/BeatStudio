@@ -70,6 +70,25 @@ TrackView::TrackView( Track * track, TrackContainerView * tcv ) :
 {
 	setAutoFillBackground( true );
 	QPalette pal;
+
+	// Beat Studio: FL-style per-track color coding
+	static const QColor s_trackColors[] = {
+		QColor(232, 83, 74),   // red
+		QColor(232, 162, 58),  // orange
+		QColor(90, 200, 90),   // green
+		QColor(58, 157, 232),  // blue
+		QColor(155, 90, 232),  // purple
+		QColor(232, 90, 155),  // pink
+		QColor(58, 200, 180),  // teal
+		QColor(200, 200, 58),  // yellow
+	};
+	const auto& trackList = tcv->trackViews();
+	int trackIndex = trackList.size(); // current index = size before adding
+	if (track->type() == Track::Type::Instrument || track->type() == Track::Type::Pattern) {
+		QColor trackColor = s_trackColors[trackIndex % 8];
+		track->setColor(trackColor);
+	}
+
 	pal.setColor( backgroundRole(), QColor( 32, 36, 40 ) );
 	setPalette( pal );
 

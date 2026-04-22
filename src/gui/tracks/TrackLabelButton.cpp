@@ -27,6 +27,7 @@
 #include "TrackLabelButton.h"
 
 #include <QMouseEvent>
+#include <QPainter>
 
 #include "ConfigManager.h"
 #include "DeprecationHelper.h"
@@ -216,6 +217,19 @@ void TrackLabelButton::paintEvent(QPaintEvent* pe)
 		}
 	}
 	QToolButton::paintEvent(pe);
+
+	// Beat Studio: draw FL-style color bar on left edge
+	const auto& trackColor = m_trackView->getTrack()->color();
+	if (trackColor.has_value())
+	{
+		QPainter p(this);
+		p.setRenderHint(QPainter::Antialiasing, false);
+		// Draw a 4px colored bar on the left
+		p.fillRect(0, 0, 4, height(), trackColor.value());
+		// Draw a subtle highlight at top of bar
+		QColor highlight = trackColor.value().lighter(140);
+		p.fillRect(0, 0, 4, 3, highlight);
+	}
 }
 
 
