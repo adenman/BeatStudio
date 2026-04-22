@@ -3306,6 +3306,23 @@ void PianoRoll::dragNotes(int x, int y, bool alt, bool shift, bool ctrl)
 		}
 	}
 
+	else if (m_action == Action::ResizeNoteLeft)
+	{
+		// Beat Studio: FL-style resize from left edge
+		if (!alt)
+			off_ticks = floor(off_ticks / quantization()) * quantization();
+		for( Note *note : getSelectedNotes() )
+		{
+			int newPos = note->oldPos().getTicks() + off_ticks;
+			int newLen = note->oldLength().getTicks() - off_ticks;
+			if( newLen >= (alt ? 1 : m_minResizeLen.getTicks()) && newPos >= 0 )
+			{
+				note->setPos( TimePos( newPos ) );
+				note->setLength( TimePos( newLen ) );
+			}
+		}
+	}
+
 	m_midiClip->updateLength();
 	m_midiClip->dataChanged();
 	Engine::getSong()->setModified();
