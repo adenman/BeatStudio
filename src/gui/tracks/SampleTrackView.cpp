@@ -114,14 +114,14 @@ SampleTrackView::SampleTrackView( SampleTrack * _t, TrackContainerView* tcv ) :
 	);
 	// Beat Studio: standalone recorder using PortAudio directly
 	m_recorder = new BeatStudioRecorder(this);
-	connect(m_recorder, &BeatStudioRecorder::recordingFinished, [_t](const QString& filePath) {
-		// Create a sample clip with the recorded file
+	connect(m_recorder, &BeatStudioRecorder::recordingFinished, this, [_t](const QString& filePath) {
+		// Create a sample clip with the recorded file - runs on main thread via Qt::QueuedConnection
 		auto* sc = dynamic_cast<SampleClip*>(_t->createClip(TimePos(0)));
 		if (sc) {
 			_t->addClip(sc);
 			sc->setSampleFile(filePath);
 		}
-	});
+	}, Qt::QueuedConnection);
 	connect(m_recordButton, &QPushButton::toggled, [this](bool checked) {
 		if (checked) {
 			m_recorder->startRecording();
