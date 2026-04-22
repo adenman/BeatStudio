@@ -28,6 +28,7 @@
 
 #include "SampleTrack.h"
 #include "TrackView.h"
+#include <QPushButton>
 
 namespace lmms
 {
@@ -92,6 +93,7 @@ private:
 	MixerChannelLcdSpinBox* m_mixerChannelNumber;
 	Knob * m_volumeKnob;
 	Knob * m_panningKnob;
+	QPushButton * m_recordButton{nullptr};
 	FadeButton * m_activityIndicator;
 
 	TrackLabelButton * m_tlb;

@@ -27,6 +27,7 @@
 #include <QApplication>
 #include <QHBoxLayout>
 #include <QMenu>
+#include <QPushButton>
 #include <QSpacerItem>
 #include <QVBoxLayout>
 
@@ -97,6 +98,28 @@ SampleTrackView::SampleTrackView( SampleTrack * _t, TrackContainerView* tcv ) :
 	layout->addWidget(m_activityIndicator);
 	layout->addWidget(m_volumeKnob);
 	layout->addWidget(m_panningKnob);
+
+	// Beat Studio: Add record button to sample track
+	m_recordButton = new QPushButton(getTrackSettingsWidget());
+	m_recordButton->setIcon(embed::getIconPixmap("record"));
+	m_recordButton->setToolTip(tr("Arm track for recording"));
+	m_recordButton->setCheckable(true);
+	m_recordButton->setFixedSize(24, 24);
+	m_recordButton->setStyleSheet(
+		"QPushButton { background: #2a2a2a; border: 1px solid #444; border-radius: 3px; }"
+		"QPushButton:checked { background: #cc0000; border: 1px solid #ff0000; }"
+		"QPushButton:hover { border: 1px solid #ff8c00; }"
+	);
+	connect(m_recordButton, &QPushButton::toggled, [_t](bool checked) {
+		// Find the first clip on this track and set its record state
+		for (auto* clip : _t->getClips()) {
+			if (auto* sc = dynamic_cast<SampleClip*>(clip)) {
+				sc->setRecord(checked);
+			}
+		}
+	});
+	layout->addWidget(m_recordButton);
+
 	masterLayout->addLayout(layout);
 	masterLayout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Minimum, QSizePolicy::Expanding));
 
