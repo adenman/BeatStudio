@@ -24,6 +24,8 @@
 
 #include "Vestige.h"
 
+#include <QDir>
+#include <QLabel>
 #include <QDomElement>
 #include <QDropEvent>
 #include <QGridLayout>
@@ -62,6 +64,49 @@ namespace lmms
 extern "C"
 {
 
+// Beat Studio: VST instrument browser scanner
+class VestigeSubPluginFeatures : public Plugin::Descriptor::SubPluginFeatures
+{
+public:
+	VestigeSubPluginFeatures() : SubPluginFeatures( Plugin::Type::Instrument ) {}
+
+	void fillDescriptionWidget( QWidget* parent, const Key* key ) const override
+	{
+		new QLabel( QWidget::tr("VST Plugin: ") + key->name, parent );
+		new QLabel( QWidget::tr("File: ") + key->attributes["file"], parent );
+	}
+
+	void listSubPluginKeys( const Plugin::Descriptor* desc, KeyList& kl ) const override
+	{
+		QStringList dlls;
+		scanDir( dlls, QString("") );
+		for( const QString& dll : dlls )
+		{
+			Plugin::Descriptor::SubPluginFeatures::Key::AttributeMap am;
+			am["file"] = dll;
+			kl.push_back( Key( desc, QFileInfo(dll).baseName(), am ) );
+		}
+	}
+
+private:
+	void scanDir( QStringList& files, const QString& subPath ) const
+	{
+		const QString base = ConfigManager::inst()->vstDir();
+		QDir dir( base + subPath );
+		// recurse into subdirectories
+		for( const QString& d : dir.entryList( QDir::Dirs | QDir::NoDotAndDotDot ) )
+			scanDir( files, subPath + QDir::separator() + d );
+		// collect DLLs
+		for( const QString& f : dir.entryList( QStringList() << "*.dll", QDir::Files ) )
+		{
+			QString full = base + subPath + QDir::separator() + f;
+			files.append( full );
+		}
+	}
+};
+
+static VestigeSubPluginFeatures s_vestigeSubPluginFeatures;
+
 Plugin::Descriptor Q_DECL_EXPORT  vestige_plugin_descriptor =
 {
 	LMMS_STRINGIFY( PLUGIN_NAME ),
@@ -81,7 +126,7 @@ Plugin::Descriptor Q_DECL_EXPORT  vestige_plugin_descriptor =
 		"so",
 #	endif
 #endif
-	nullptr,
+	&s_vestigeSubPluginFeatures,
 } ;
 
 }
