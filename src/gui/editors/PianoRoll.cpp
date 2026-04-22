@@ -2489,25 +2489,7 @@ void PianoRoll::mouseMoveEvent( QMouseEvent * me )
 		}
 	}
 
-	else if( m_action == Action::ResizeNoteLeft )
-	{
-		// Beat Studio: resize note from left side
-		if (!alt)
-		{
-			off_ticks = floor(off_ticks / quantization()) * quantization();
-		}
-		for( Note *note : getSelectedNotes() )
-		{
-			int newPos = note->oldPos().getTicks() + off_ticks;
-			int newLen = note->oldLength().getTicks() - off_ticks;
-			if( newLen >= m_minResizeLen && newPos >= 0 )
-			{
-				note->setPos( TimePos( newPos ) );
-				note->setLength( TimePos( newLen ) );
-			}
-		}
-		m_midiClip->updateLength();
-		Engine::getSong()->setModified();
+
 	}
 	else if( m_action == Action::ResizeNoteEditArea )
 	{
