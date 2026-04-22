@@ -580,7 +580,7 @@ void InstrumentTrackWindow::dropEvent( QDropEvent* event )
 	{
 		// Beat Studio: retrieve the subplugin key set during drag (contains VST file path)
 		using PluginKey = Plugin::Descriptor::SubPluginFeatures::Key;
-		PluginKey* dndKey = static_cast<PluginKey*>( Engine::getDndPluginKey() );
+		PluginKey* dndKey = static_cast<PluginKey*>( Engine::pickDndPluginKey() );
 		if( dndKey && dndKey->isValid() )
 		{
 			m_track->loadInstrument( value, dndKey );
