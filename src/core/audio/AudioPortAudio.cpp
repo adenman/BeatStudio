@@ -149,7 +149,24 @@ AudioPortAudio::AudioPortAudio(bool& successful, AudioEngine* engine)
 
 	const auto inputParametersPtr = inputDeviceIndex == paNoDevice ? nullptr : &inputParameters; 
 	const auto outputParametersPtr = outputDeviceIndex == paNoDevice ? nullptr : &outputParameters;
-	auto err = Pa_IsFormatSupported(inputParametersPtr, outputParametersPtr, sampleRate);
+
+	// Beat Studio: if no input device matched by name, try default input device
+	PaStreamParameters defaultInputParameters;
+	const PaStreamParameters* actualInputPtr = inputParametersPtr;
+	if (actualInputPtr == nullptr && Pa_GetDefaultInputDevice() != paNoDevice)
+	{
+		const auto defaultInput = Pa_GetDefaultInputDevice();
+		const auto defaultInputInfo = Pa_GetDeviceInfo(defaultInput);
+		defaultInputParameters = {
+			.device = defaultInput,
+			.channelCount = defaultInputInfo->maxInputChannels > 0 ? std::min(2, (int)defaultInputInfo->maxInputChannels) : 1,
+			.sampleFormat = paFloat32,
+			.suggestedLatency = defaultInputInfo->defaultLowInputLatency,
+			.hostApiSpecificStreamInfo = nullptr
+		};
+		actualInputPtr = &defaultInputParameters;
+	}
+	auto err = Pa_IsFormatSupported(actualInputPtr, outputParametersPtr, sampleRate);
 
 	if (err != paFormatIsSupported)
 	{
@@ -158,7 +175,7 @@ AudioPortAudio::AudioPortAudio(bool& successful, AudioEngine* engine)
 		return;
 	}
 
-	err = Pa_OpenStream(&m_paStream, inputParametersPtr, outputParametersPtr, sampleRate, framesPerBuffer, paNoFlag,
+	err = Pa_OpenStream(&m_paStream, actualInputPtr, outputParametersPtr, sampleRate, framesPerBuffer, paNoFlag,
 		&AudioPortAudio::processCallback, this);
 	
 	if (err != paNoError)
