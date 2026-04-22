@@ -186,6 +186,7 @@ AudioPortAudio::AudioPortAudio(bool& successful, AudioEngine* engine)
 	}
 
 	successful = true;
+	m_supportsCapture = (actualInputPtr != nullptr); // Beat Studio: enable record button
 	setSampleRate(sampleRate);
 	setChannels(outputDeviceChannels);
 }
