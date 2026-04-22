@@ -1,6 +1,7 @@
 #pragma once
 #include <QObject>
 #include <QThread>
+#include <QMutex>
 #include <QString>
 #include <vector>
 #include <atomic>
@@ -33,9 +34,9 @@ private:
         void* userData);
 
     std::vector<float> m_buffer;
+    QMutex m_mutex;
     std::atomic<bool> m_recording{false};
     QString m_outputFile;
-    PaStream* m_stream{nullptr};
     int m_sampleRate{44100};
 };
 
