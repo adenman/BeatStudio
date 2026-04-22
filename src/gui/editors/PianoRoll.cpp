@@ -176,7 +176,7 @@ PianoRoll::PianoRoll() :
 	m_mouseDownTick( 0 ),
 	m_lastMouseX( 0 ),
 	m_lastMouseY( 0 ),
-	m_notesEditHeight( 100 ),
+	m_notesEditHeight( 140 ),
 	m_userSetNotesEditHeight(100),
 	m_ppb( DEFAULT_PR_PPB ),
 	m_keyLineHeight(DEFAULT_KEY_LINE_HEIGHT),
@@ -1910,8 +1910,18 @@ void PianoRoll::mousePressEvent(QMouseEvent * me )
 					m_moveBoundaryTop = qMax(note->key(), m_moveBoundaryTop);
 				}
 
+				// clicked at the "head" (left side) of the note? - Beat Studio: left resize
+				int notePosX = m_currentNote->pos() * m_ppb / TimePos::ticksPerBar();
+				int clickX = pos_ticks * m_ppb / TimePos::ticksPerBar();
+				if( clickX < notePosX + RESIZE_AREA_WIDTH
+					&& m_currentNote->length() > 0 )
+				{
+					m_midiClip->addJournalCheckPoint();
+					m_action = Action::ResizeNoteLeft;
+					setCursor( Qt::SizeHorCursor );
+				}
 				// clicked at the "tail" of the note?
-				if( pos_ticks * m_ppb / TimePos::ticksPerBar() >
+				else if( pos_ticks * m_ppb / TimePos::ticksPerBar() >
 						m_currentNote->endPos() * m_ppb / TimePos::ticksPerBar() - RESIZE_AREA_WIDTH
 					&& m_currentNote->length() > 0 )
 				{
@@ -2395,7 +2405,7 @@ void PianoRoll::mouseReleaseEvent( QMouseEvent * me )
 			m_knifeDown = false;
 		}
 
-		if( m_action == Action::MoveNote || m_action == Action::ResizeNote )
+		if( m_action == Action::MoveNote || m_action == Action::ResizeNote || m_action == Action::ResizeNoteLeft )
 		{
 			// if we only moved one note, deselect it so we can
 			// edit the notes in the note edit area
@@ -2478,6 +2488,27 @@ void PianoRoll::mouseMoveEvent( QMouseEvent * me )
 			return;
 		}
 	}
+
+	else if( m_action == Action::ResizeNoteLeft )
+	{
+		// Beat Studio: resize note from left side
+		if (!alt)
+		{
+			off_ticks = floor(off_ticks / quantization()) * quantization();
+		}
+		for( Note *note : getSelectedNotes() )
+		{
+			int newPos = note->oldPos().getTicks() + off_ticks;
+			int newLen = note->oldLength().getTicks() - off_ticks;
+			if( newLen >= m_minResizeLen && newPos >= 0 )
+			{
+				note->setPos( TimePos( newPos ) );
+				note->setLength( TimePos( newLen ) );
+			}
+		}
+		m_midiClip->updateLength();
+		Engine::getSong()->setModified();
+	}
 	else if( m_action == Action::ResizeNoteEditArea )
 	{
 		// Don't try to show more keys than the full keyboard, bail if trying to
@@ -2540,7 +2571,7 @@ void PianoRoll::mouseMoveEvent( QMouseEvent * me )
 
 		if( me->buttons() & Qt::LeftButton
 			&& m_editMode == EditMode::Draw
-			&& (m_action == Action::MoveNote || m_action == Action::ResizeNote ) )
+			&& (m_action == Action::MoveNote || m_action == Action::ResizeNote || m_action == Action::ResizeNoteLeft ) )
 		{
 			// handle moving notes and resizing them
 			bool replay_note = key_num != m_lastKey
@@ -2704,13 +2735,15 @@ void PianoRoll::mouseMoveEvent( QMouseEvent * me )
 			if (it != notes.rend())
 			{
 				Note *note = *it;
-				// x coordinate of the right edge of the note
+				// x coordinate of right and left edge of the note
 				int noteRightX = ( note->pos() + note->length() -
 					m_currentPosition) * m_ppb/TimePos::ticksPerBar();
-				// cursor at the "tail" of the note?
-				bool atTail = note->length() > 0 && x > noteRightX -
-							RESIZE_AREA_WIDTH;
-				Qt::CursorShape cursorShape = atTail ? Qt::SizeHorCursor :
+				int noteLeftX = ( note->pos() -
+					m_currentPosition) * m_ppb/TimePos::ticksPerBar();
+				// cursor at the "tail" (right) or "head" (left) of the note?
+				bool atTail = note->length() > 0 && x > noteRightX - RESIZE_AREA_WIDTH;
+				bool atHead = note->length() > 0 && x < noteLeftX + RESIZE_AREA_WIDTH;
+				Qt::CursorShape cursorShape = (atTail || atHead) ? Qt::SizeHorCursor :
 													Qt::SizeAllCursor;
 				setCursor( cursorShape );
 			}

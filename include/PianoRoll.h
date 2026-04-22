@@ -263,6 +263,7 @@ private:
 		None,
 		MoveNote,
 		ResizeNote,
+		ResizeNoteLeft,
 		SelectNotes,
 		ChangeNoteProperty,
 		ResizeNoteEditArea,
