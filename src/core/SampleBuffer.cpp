@@ -78,7 +78,9 @@ std::shared_ptr<const SampleBuffer> SampleBuffer::fromFile(const QString& filePa
 	const auto absolutePath = PathUtil::toAbsolute(filePath);
 	const auto storedPath = PathUtil::toShortestRelative(filePath);
 
+	qDebug("[BeatStudio] decoding path: %s", qPrintable(absolutePath));
 	auto result = SampleDecoder::decode(absolutePath);
+	qDebug("[BeatStudio] decode result: %s", result ? "ok" : "null");
 
 	if (!result)
 	{
