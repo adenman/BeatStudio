@@ -106,15 +106,19 @@ void BeatStudioRecorder::stopRecording()
     if (!m_recording) return;
     m_recording = false;
 
-    if (m_audioSource) {
-        m_audioSource->stop();
-        delete m_audioSource;
-        m_audioSource = nullptr;
+    if (m_audioDevice) {
+        disconnect(m_audioDevice, &QIODevice::readyRead, this, &BeatStudioRecorder::onAudioData);
         m_audioDevice = nullptr;
     }
 
+    if (m_audioSource) {
+        m_audioSource->stop();
+        m_audioSource->deleteLater(); // safe async delete
+        m_audioSource = nullptr;
+    }
+
     qDebug("[BeatStudio] Recording stopped, saving...");
-    saveWav();
+    QMetaObject::invokeMethod(this, &BeatStudioRecorder::saveWav, Qt::QueuedConnection);
 }
 
 void BeatStudioRecorder::saveWav()
