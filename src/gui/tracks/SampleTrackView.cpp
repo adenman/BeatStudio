@@ -245,8 +245,7 @@ void SampleTrackView::dropEvent(QDropEvent *de)
 			qDebug("[BeatStudio] Explorer drop: %s", qPrintable(filePath));
 			auto sClip = static_cast<SampleClip*>(getTrack()->createClip(TimePos(0)));
 			if (sClip) {
-				getTrack()->addClip(sClip);
-				sClip->setSampleFile(filePath);
+					sClip->setSampleFile(filePath);
 				qDebug("[BeatStudio] Explorer drop: done");
 			}
 			break; // only first file
@@ -279,7 +278,6 @@ void SampleTrackView::dropEvent(QDropEvent *de)
 		auto sClip = static_cast<SampleClip*>(getTrack()->createClip(clipPos));
 		if (sClip) {
 			qDebug("[BeatStudio] dropEvent: addClip");
-			getTrack()->addClip(sClip);
 			qDebug("[BeatStudio] dropEvent: setSampleFile %s", qPrintable(value));
 			sClip->setSampleFile(value);
 			qDebug("[BeatStudio] dropEvent: done");
