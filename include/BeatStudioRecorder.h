@@ -7,6 +7,8 @@
 #include <vector>
 #include <atomic>
 
+class QTimer;
+
 namespace lmms::gui {
 
 class BeatStudioRecorder : public QObject
@@ -25,13 +27,12 @@ signals:
 
 private slots:
     void onAudioData();
-    void doStop();
-
-private:
     void saveWav();
 
+private:
     QAudioSource* m_audioSource{nullptr};
     QIODevice* m_audioDevice{nullptr};
+    QTimer* m_pollTimer{nullptr};
     std::vector<float> m_buffer;
     QMutex m_mutex;
     std::atomic<bool> m_recording{false};

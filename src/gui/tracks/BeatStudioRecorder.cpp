@@ -23,11 +23,8 @@ BeatStudioRecorder::BeatStudioRecorder(QObject* parent)
 
 BeatStudioRecorder::~BeatStudioRecorder()
 {
-    if (m_audioSource) {
-        m_audioSource->stop();
-        delete m_audioSource;
-        m_audioSource = nullptr;
-    }
+    m_recording = false;
+    // Let Qt clean up via parent ownership
 }
 
 void BeatStudioRecorder::startRecording()
@@ -45,58 +42,58 @@ void BeatStudioRecorder::startRecording()
         return;
     }
 
-    if (!inputDevice.isFormatSupported(format)) {
-        qDebug("[BeatStudio] Format not supported");
-        return;
-    }
-
     {
         QMutexLocker lock(&m_mutex);
         m_buffer.clear();
     }
 
     m_audioSource = new QAudioSource(inputDevice, format, this);
+    m_audioSource->setBufferSize(4096);
     m_audioDevice = m_audioSource->start();
 
     if (!m_audioDevice) {
-        qDebug("[BeatStudio] Failed to start audio");
-        delete m_audioSource;
+        qDebug("[BeatStudio] Failed to start audio, state=%d", (int)m_audioSource->state());
+        m_audioSource->deleteLater();
         m_audioSource = nullptr;
         return;
     }
 
     m_recording = true;
-    connect(m_audioDevice, &QIODevice::readyRead, this, &BeatStudioRecorder::onAudioData);
+
+    // Use a timer to poll audio data instead of readyRead signal
+    // This avoids any re-entrancy issues
+    m_pollTimer = new QTimer(this);
+    m_pollTimer->setInterval(50);
+    connect(m_pollTimer, &QTimer::timeout, this, &BeatStudioRecorder::onAudioData);
+    m_pollTimer->start();
+
     qDebug("[BeatStudio] Recording started");
 }
 
 void BeatStudioRecorder::stopRecording()
 {
-    // Don't do anything here directly - use a timer to stop safely
-    // after the current event loop iteration completes
+    if (!m_recording) return;
     m_recording = false;
-    QTimer::singleShot(100, this, &BeatStudioRecorder::doStop);
-}
 
-void BeatStudioRecorder::doStop()
-{
-    if (m_audioDevice) {
-        disconnect(m_audioDevice, nullptr, this, nullptr);
-        m_audioDevice = nullptr;
+    if (m_pollTimer) {
+        m_pollTimer->stop();
+        m_pollTimer->deleteLater();
+        m_pollTimer = nullptr;
     }
 
+    // Suspend instead of stop - much safer
     if (m_audioSource) {
-        m_audioSource->stop();
-        delete m_audioSource;
-        m_audioSource = nullptr;
+        m_audioSource->suspend();
     }
 
-    saveWav();
+    // Save on next event loop tick
+    QTimer::singleShot(200, this, &BeatStudioRecorder::saveWav);
 }
 
 void BeatStudioRecorder::onAudioData()
 {
-    if (!m_audioDevice) return;
+    if (!m_audioDevice || !m_recording) return;
+
     QByteArray data = m_audioDevice->readAll();
     if (data.isEmpty()) return;
 
@@ -106,12 +103,19 @@ void BeatStudioRecorder::onAudioData()
     for (int i = 0; i < count; ++i) {
         float s = samples[i] / 32768.f;
         m_buffer.push_back(s);
-        m_buffer.push_back(s);
+        m_buffer.push_back(s); // mono to stereo
     }
 }
 
 void BeatStudioRecorder::saveWav()
 {
+    // Clean up audio source now that we're safely in event loop
+    if (m_audioSource) {
+        m_audioSource->deleteLater();
+        m_audioSource = nullptr;
+        m_audioDevice = nullptr;
+    }
+
     std::vector<float> data;
     {
         QMutexLocker lock(&m_mutex);
@@ -159,7 +163,7 @@ void BeatStudioRecorder::saveWav()
     }
     f.close();
 
-    qDebug("[BeatStudio] Saved: %s", qPrintable(m_outputFile));
+    qDebug("[BeatStudio] Saved: %s (%zu samples)", qPrintable(m_outputFile), data.size());
     emit recordingFinished(m_outputFile);
 }
 
