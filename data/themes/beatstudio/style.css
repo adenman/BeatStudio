@@ -1521,6 +1521,4 @@ lmms--gui--CPULoadWidget {
 }
 
 /* Make sample track taller by default */
-lmms--gui--SampleTrackView {
-	min-height: 60px;
-}
+/* SampleTrackView height controlled by C++ setFixedHeight */
