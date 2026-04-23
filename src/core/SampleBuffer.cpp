@@ -101,9 +101,7 @@ std::shared_ptr<const SampleBuffer> SampleBuffer::fromBase64(const QString& str,
 
 	if (bytes.size() % sizeof(SampleFrame) != 0)
 	{
-		// TODO: Improve error handling. We dont always want to show a message box on failure when there is a GUI (e.g.
-		// when loading the project), and this function also shouldn't be concerned with handling the error.
-		qWarning() << "[BeatStudio] Failed to load sample:" << absolutePath;
+		qWarning() << "[BeatStudio] Failed to load base64 sample: invalid size";
 
 		return SampleBuffer::emptyBuffer();
 	}
