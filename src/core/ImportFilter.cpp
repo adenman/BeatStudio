@@ -24,6 +24,7 @@
 
 
 #include <memory>
+#include <QApplication>
 #include <QMessageBox>
 
 #include "ImportFilter.h"
@@ -76,7 +77,7 @@ void ImportFilter::import( const QString & _file_to_import,
 
 	if( successful == false )
 	{
-		QMessageBox::information( nullptr,
+		QMessageBox::information(QApplication::activeWindow(),
 			TrackContainer::tr( "Couldn't import file" ),
 			TrackContainer::tr( "Couldn't find a filter for "
 						"importing file %1.\n"
@@ -96,7 +97,7 @@ bool ImportFilter::openFile()
 {
 	if( m_file.open( QFile::ReadOnly ) == false )
 	{
-		QMessageBox::critical( nullptr,
+		QMessageBox::critical(QApplication::activeWindow(),
 			TrackContainer::tr( "Couldn't open file" ),
 			TrackContainer::tr( "Couldn't open file %1 "
 						"for reading.\nPlease make "

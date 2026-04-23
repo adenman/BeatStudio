@@ -30,6 +30,7 @@
 #include <cmath>
 #include <map>
 
+#include <QApplication>
 #include <QDebug>
 #include <QFile>
 #include <QFileInfo>
@@ -165,7 +166,7 @@ DataFile::DataFile( const QString & _fileName ) :
 	{
 		if (gui::getGUI() != nullptr)
 		{
-			QMessageBox::critical( nullptr,
+			QMessageBox::critical(QApplication::activeWindow(),
 				gui::SongEditor::tr( "Could not open file" ),
 				gui::SongEditor::tr( "Could not open file %1. You probably "
 						"have no permissions to read this "
@@ -2061,7 +2062,7 @@ void DataFile::findProblematicLadspaPlugins()
 
 	if (numberOfProblematicPlugins > 0)
 	{
-		QMessageBox::warning(nullptr, QObject::tr("LADSPA plugins"),
+		QMessageBox::warning(QApplication::activeWindow(), QObject::tr("LADSPA plugins"),
 			QObject::tr("The project contains %1 LADSPA plugin(s) which might have not been restored correctly! Please check the project.").arg(numberOfProblematicPlugins));
 	}
 }
@@ -2147,7 +2148,7 @@ void DataFile::loadData( const QByteArray & _data, const QString & _sourceFile )
 			qWarning() << "at line" << line << "column" << errorMsg;
 			if (gui::getGUI() != nullptr)
 			{
-				QMessageBox::critical( nullptr,
+				QMessageBox::critical(QApplication::activeWindow(),
 					SongEditor::tr( "Error in file" ),
 					SongEditor::tr( "The file %1 seems to contain "
 							"errors and therefore can't be "

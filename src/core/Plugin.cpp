@@ -24,6 +24,7 @@
 
 #include "Plugin.h"
 
+#include <QApplication>
 #include <QDomElement>
 #include <QLibrary>
 #include <QMessageBox>
@@ -215,7 +216,7 @@ Plugin * Plugin::instantiate(const QString& pluginName, Model * parent,
 	{
 		if (gui::getGUI() != nullptr)
 		{
-			QMessageBox::information( nullptr,
+			QMessageBox::information(QApplication::activeWindow(),
 				tr( "Plugin not found" ),
 				tr( "The plugin \"%1\" wasn't found or could not be loaded!\nReason: \"%2\"" ).
 						arg( pluginName ).arg( getPluginFactory()->errorString(pluginName) ),
@@ -237,7 +238,7 @@ Plugin * Plugin::instantiate(const QString& pluginName, Model * parent,
 		{
 			if (gui::getGUI() != nullptr)
 			{
-				QMessageBox::information( nullptr,
+				QMessageBox::information(QApplication::activeWindow(),
 					tr( "Error while loading plugin" ),
 					tr( "Failed to load plugin \"%1\"!").arg( pluginName ),
 					QMessageBox::Ok | QMessageBox::Default );

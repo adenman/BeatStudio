@@ -24,6 +24,7 @@
 
 #include "SampleBuffer.h"
 
+#include <QApplication>
 #include <QDebug>
 #include <QMessageBox>
 #include <cstring>
@@ -85,7 +86,7 @@ std::shared_ptr<const SampleBuffer> SampleBuffer::fromFile(const QString& filePa
 		// when loading the project), and this function also shouldn't be concerned with handling the error.
 		if (gui::getGUI())
 		{
-			QMessageBox::warning(nullptr, QObject::tr("Failed to load sample"),
+			QMessageBox::warning(gui::getGUI() ? (QWidget*)gui::getGUI()->mainWindow() : nullptr, QObject::tr("Failed to load sample"),
 				QObject::tr("The sample may be corrupted or unsupported."));
 		}
 		else
@@ -114,8 +115,7 @@ std::shared_ptr<const SampleBuffer> SampleBuffer::fromBase64(const QString& str,
 		// when loading the project), and this function also shouldn't be concerned with handling the error.
 		if (gui::getGUI())
 		{
-			QMessageBox::warning(
-				nullptr, QObject::tr("Failed to load sample"), QObject::tr("The sample size is invalid."));
+			QMessageBox::warning(QApplication::activeWindow(), QObject::tr("Failed to load sample"), QObject::tr("The sample size is invalid."));
 		}
 		else
 		{

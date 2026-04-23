@@ -23,6 +23,7 @@
  */
 
 #include "Song.h"
+#include <QApplication>
 #include <QTextStream>
 #include <QCoreApplication>
 #include <QDebug>
@@ -1037,7 +1038,7 @@ void Song::loadProject( const QString & fileName )
 
 			if (getGUI() != nullptr)
 			{
-				QMessageBox::critical(nullptr, tr("Aborting project load"),
+				QMessageBox::critical(QApplication::activeWindow(), tr("Aborting project load"),
 					tr("Project file contains local paths to plugins, which could be used to "
 						"run malicious code."));
 			}
@@ -1195,7 +1196,7 @@ void Song::loadProject( const QString & fileName )
 	{
 		if ( getGUI() != nullptr )
 		{
-			QMessageBox::warning( nullptr, tr("LMMS Error report"), errorSummary(),
+			QMessageBox::warning(QApplication::activeWindow(), tr("LMMS Error report"), errorSummary(),
 							QMessageBox::Ok );
 		}
 		else
