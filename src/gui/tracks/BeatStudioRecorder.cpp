@@ -82,17 +82,24 @@ void BeatStudioRecorder::startRecording()
             }
         }
 
-        // Check if we should stop
+        // Check if we should stop - don't stop timer from inside callback
         if (!m_recording && !m_saving) {
             m_saving = true;
-            m_pollTimer->stop();
-            m_audioDevice = nullptr;
-            if (m_audioSource) {
-                m_audioSource->disconnect();
-                m_audioSource->deleteLater();
-                m_audioSource = nullptr;
-            }
-            saveWav();
+            // Schedule cleanup on next event loop tick, not from inside timer callback
+            QTimer::singleShot(0, this, [this]() {
+                if (m_pollTimer) {
+                    m_pollTimer->stop();
+                    m_pollTimer->deleteLater();
+                    m_pollTimer = nullptr;
+                }
+                m_audioDevice = nullptr;
+                if (m_audioSource) {
+                    m_audioSource->disconnect();
+                    m_audioSource->deleteLater();
+                    m_audioSource = nullptr;
+                }
+                saveWav();
+            });
         }
     });
     m_pollTimer->start();
