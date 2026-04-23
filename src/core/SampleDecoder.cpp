@@ -61,18 +61,15 @@ auto decodeSampleSF(const QString& audioFile) -> std::optional<SampleDecoder::Re
 	SNDFILE* sndFile = nullptr;
 	auto sfInfo = SF_INFO{};
 
-	// TODO: Remove use of QFile
-	auto file = QFile{audioFile};
-	if (!file.open(QIODevice::ReadOnly)) { return std::nullopt; }
-
-	sndFile = sf_open_fd(file.handle(), SFM_READ, &sfInfo, false);
-	if (sf_error(sndFile) != 0) { return std::nullopt; }
+	// Beat Studio: use sf_open with path directly to avoid MSVC/MinGW ABI mismatch with sf_open_fd
+	const QByteArray pathBytes = audioFile.toLocal8Bit();
+	sndFile = sf_open(pathBytes.constData(), SFM_READ, &sfInfo);
+	if (!sndFile || sf_error(sndFile) != 0) { return std::nullopt; }
 
 	auto buf = std::vector<sample_t>(sfInfo.channels * sfInfo.frames);
 	sf_read_float(sndFile, buf.data(), buf.size());
 
 	sf_close(sndFile);
-	file.close();
 
 	auto result = std::vector<SampleFrame>(sfInfo.frames);
 	for (int i = 0; i < static_cast<int>(result.size()); ++i)
