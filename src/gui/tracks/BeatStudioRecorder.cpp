@@ -150,7 +150,7 @@ void BeatStudioRecorder::saveWav()
     f.close();
 
     qDebug("[BeatStudio] Saved: %s (%u samples)", qPrintable(m_outputFile), nSamples);
-    emit recordingFinished(m_outputFile);
+    // File saved successfully - no signal needed
 }
 
 } // namespace lmms::gui
