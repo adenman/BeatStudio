@@ -33,6 +33,9 @@
 #include <QVBoxLayout>
 
 #include "BeatStudioRecorder.h"
+#include <QDesktopServices>
+#include <QFileInfo>
+#include <QUrl>
 
 #include "ConfigManager.h"
 #include "DeprecationHelper.h"
@@ -117,11 +120,8 @@ SampleTrackView::SampleTrackView( SampleTrack * _t, TrackContainerView* tcv ) :
 	m_recorder = new BeatStudioRecorder(this);
 	connect(m_recorder, &BeatStudioRecorder::recordingFinished, this, [](const QString& filePath) {
 		qDebug("[BeatStudio] Recording saved to: %s", qPrintable(filePath));
-		// Show the user where the file was saved
-		QMessageBox::information(nullptr,
-			"Beat Studio - Recording Saved",
-			"Recording saved to:\n" + filePath +
-			"\n\nDrag this file into a sample track to use it.");
+		// Open the folder containing the file so user can drag it in
+		QDesktopServices::openUrl(QUrl::fromLocalFile(QFileInfo(filePath).absolutePath()));
 	}, Qt::QueuedConnection);
 	connect(m_recordButton, &QPushButton::toggled, [this](bool checked) {
 		if (checked) {
