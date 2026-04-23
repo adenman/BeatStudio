@@ -31,6 +31,7 @@ private:
     QTimer* m_pollTimer{nullptr};
     std::vector<float> m_buffer;
     std::atomic<bool> m_recording{false};
+    std::atomic<bool> m_saving{false};
     QString m_outputFile;
     int m_sampleRate{44100};
 };

@@ -29,6 +29,7 @@ BeatStudioRecorder::~BeatStudioRecorder()
 void BeatStudioRecorder::startRecording()
 {
     if (m_recording) return;
+    m_saving = false;
 
     QAudioFormat format;
     format.setSampleRate(m_sampleRate);
@@ -82,17 +83,15 @@ void BeatStudioRecorder::startRecording()
         }
 
         // Check if we should stop
-        if (!m_recording) {
+        if (!m_recording && !m_saving) {
+            m_saving = true;
             m_pollTimer->stop();
-            // Clean up audio BEFORE saving
             m_audioDevice = nullptr;
             if (m_audioSource) {
-                // Disconnect everything first
                 m_audioSource->disconnect();
                 m_audioSource->deleteLater();
                 m_audioSource = nullptr;
             }
-            // Now safe to save
             saveWav();
         }
     });
