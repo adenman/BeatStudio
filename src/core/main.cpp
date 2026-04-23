@@ -114,6 +114,7 @@ extern "C" _CRTIMP errno_t __cdecl freopen_s(FILE** _File,
 #endif
 
 #include <windows.h>
+#include <QDir>
 #include <QFile>
 #include <QTextStream>
 #include <QDateTime>
