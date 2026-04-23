@@ -3,10 +3,9 @@
 #include <QString>
 #include <QAudioSource>
 #include <QAudioFormat>
+#include <QTimer>
 #include <vector>
 #include <atomic>
-
-class QTimer;
 
 namespace lmms::gui {
 

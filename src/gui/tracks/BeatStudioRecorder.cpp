@@ -1,4 +1,5 @@
 #include "BeatStudioRecorder.h"
+#include <QTimer>
 #include <QAudioSink>
 #include <QAudioFormat>
 #include <QAudioDevice>

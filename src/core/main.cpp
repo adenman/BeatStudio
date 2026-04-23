@@ -113,12 +113,48 @@ extern "C" _CRTIMP errno_t __cdecl freopen_s(FILE** _File,
 	const char *_Filename, const char *_Mode, FILE *_Stream);
 #endif
 
+#include <windows.h>
+#include <QFile>
+#include <QTextStream>
+#include <QDateTime>
+#include <QStandardPaths>
+
+static QFile* s_logFile = nullptr;
+
+// Beat Studio crash handler - writes crash report to file
+static LONG WINAPI beatStudioCrashHandler(EXCEPTION_POINTERS* ep)
+{
+	if (s_logFile && s_logFile->isOpen()) {
+		QTextStream ts(s_logFile);
+		ts << "\n=== CRASH REPORT ===\n";
+		ts << "Time: " << QDateTime::currentDateTime().toString() << "\n";
+		ts << "Exception code: 0x" << QString::number(ep->ExceptionRecord->ExceptionCode, 16) << "\n";
+		ts << "Exception address: 0x" << QString::number((quint64)ep->ExceptionRecord->ExceptionAddress, 16) << "\n";
+		s_logFile->flush();
+	}
+	return EXCEPTION_CONTINUE_SEARCH;
+}
+
 // For qInstallMessageHandler
 void consoleMessageHandler(QtMsgType type,
 	const QMessageLogContext &context, const QString &msg)
 {
     QByteArray localMsg = msg.toLocal8Bit();
     fprintf(stderr, "%s\n", localMsg.constData());
+    // Also write to log file
+    if (s_logFile && s_logFile->isOpen()) {
+        QTextStream ts(s_logFile);
+        const char* typeStr = "";
+        switch(type) {
+            case QtDebugMsg: typeStr = "DEBUG"; break;
+            case QtWarningMsg: typeStr = "WARN"; break;
+            case QtCriticalMsg: typeStr = "CRIT"; break;
+            case QtFatalMsg: typeStr = "FATAL"; break;
+            default: typeStr = "INFO"; break;
+        }
+        ts << "[" << typeStr << "] " << msg << "\n";
+        s_logFile->flush();
+    }
 }
 #endif // LMMS_BUILD_WIN32
 
@@ -334,6 +370,21 @@ int main( int argc, char * * argv )
 	}
 	// Make Qt's debug message handlers work
 	qInstallMessageHandler(consoleMessageHandler);
+
+	// Beat Studio: set up crash log file
+	{
+		QString logDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+		QDir().mkpath(logDir);
+		QString logPath = logDir + "/beatstudio_log.txt";
+		s_logFile = new QFile(logPath);
+		if (s_logFile->open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)) {
+			QTextStream ts(s_logFile);
+			ts << "\n=== Beat Studio Started: " << QDateTime::currentDateTime().toString() << " ===\n";
+			s_logFile->flush();
+		}
+		SetUnhandledExceptionFilter(beatStudioCrashHandler);
+		qDebug("[BeatStudio] Log file: %s", qPrintable(logPath));
+	}
 #endif
 
 #if defined(LMMS_HAVE_SYS_PRCTL_H) && defined(PR_SET_CHILD_SUBREAPER)
