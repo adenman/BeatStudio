@@ -112,14 +112,20 @@ SampleTrackView::SampleTrackView( SampleTrack * _t, TrackContainerView* tcv ) :
 		"QPushButton:checked { background: #cc0000; border: 1px solid #ff0000; }"
 		"QPushButton:hover { border: 1px solid #ff8c00; }"
 	);
-	// Beat Studio: standalone recorder using PortAudio directly
+	// Beat Studio: standalone recorder
 	m_recorder = new BeatStudioRecorder(this);
 	connect(m_recorder, &BeatStudioRecorder::recordingFinished, this, [_t](const QString& filePath) {
-		// Create a sample clip with the recorded file - runs on main thread via Qt::QueuedConnection
-		auto* sc = dynamic_cast<SampleClip*>(_t->createClip(TimePos(0)));
-		if (sc) {
+		qDebug("[BeatStudio] Recording saved to: %s", qPrintable(filePath));
+		// Add the recorded file as a new clip on the track
+		// Use addClip with a properly created clip
+		try {
+			auto* sc = new SampleClip(_t);
+			sc->movePosition(TimePos(0));
 			_t->addClip(sc);
 			sc->setSampleFile(filePath);
+			qDebug("[BeatStudio] Clip added successfully");
+		} catch (...) {
+			qDebug("[BeatStudio] Failed to add clip");
 		}
 	}, Qt::QueuedConnection);
 	connect(m_recordButton, &QPushButton::toggled, [this](bool checked) {
