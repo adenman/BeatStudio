@@ -120,8 +120,6 @@ SampleTrackView::SampleTrackView( SampleTrack * _t, TrackContainerView* tcv ) :
 	m_recorder = new BeatStudioRecorder(this);
 	connect(m_recorder, &BeatStudioRecorder::recordingFinished, this, [](const QString& filePath) {
 		qDebug("[BeatStudio] Recording saved to: %s", qPrintable(filePath));
-		// Open the folder containing the file so user can drag it in
-		QDesktopServices::openUrl(QUrl::fromLocalFile(QFileInfo(filePath).absolutePath()));
 	}, Qt::QueuedConnection);
 	connect(m_recordButton, &QPushButton::toggled, [this](bool checked) {
 		if (checked) {
@@ -257,8 +255,11 @@ void SampleTrackView::dropEvent(QDropEvent *de)
 
 		auto sClip = static_cast<SampleClip*>(getTrack()->createClip(clipPos));
 		if (sClip) {
-			getTrack()->addClip(sClip); // Beat Studio: register clip with track
+			qDebug("[BeatStudio] dropEvent: addClip");
+			getTrack()->addClip(sClip);
+			qDebug("[BeatStudio] dropEvent: setSampleFile %s", qPrintable(value));
 			sClip->setSampleFile(value);
+			qDebug("[BeatStudio] dropEvent: done");
 		}
 	}
 }
