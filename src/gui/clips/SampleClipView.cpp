@@ -25,9 +25,12 @@
 #include "SampleClipView.h"
 
 #include <QApplication>
+#include <QDebug>
 #include <QMenu>
 #include <QPainter>
 
+#include "AudioEngine.h"
+#include "Engine.h"
 #include "FileDialog.h"
 #include "GuiApplication.h"
 #include "AutomationEditor.h"
@@ -191,7 +194,9 @@ void SampleClipView::mouseDoubleClickEvent( QMouseEvent * )
 	const QString selectedAudioFile = FileDialog::openAudioFile();
 
 	if (selectedAudioFile.isEmpty()) { return; }
-	
+
+	qDebug("[BeatStudio] mouseDoubleClick: loading %s", qPrintable(selectedAudioFile));
+	Engine::audioEngine()->requestChangeInModel();
 	if (!m_clip->hasSampleFileLoaded(selectedAudioFile))
 	{
 		auto sampleBuffer = SampleBuffer::fromFile(selectedAudioFile);
@@ -201,6 +206,8 @@ void SampleClipView::mouseDoubleClickEvent( QMouseEvent * )
 		}
 	}
 	m_clip->updateLength();
+	Engine::audioEngine()->doneChangeInModel();
+	qDebug("[BeatStudio] mouseDoubleClick: done");
 }
 
 
