@@ -25,6 +25,7 @@ signals:
 
 private slots:
     void onAudioData();
+    void doStop();
 
 private:
     void saveWav();

@@ -10,6 +10,7 @@
 #include <QDataStream>
 #include <QDebug>
 #include <QMutexLocker>
+#include <QTimer>
 #include <algorithm>
 #include <cstdint>
 
@@ -22,7 +23,11 @@ BeatStudioRecorder::BeatStudioRecorder(QObject* parent)
 
 BeatStudioRecorder::~BeatStudioRecorder()
 {
-    stopRecording();
+    if (m_audioSource) {
+        m_audioSource->stop();
+        delete m_audioSource;
+        m_audioSource = nullptr;
+    }
 }
 
 void BeatStudioRecorder::startRecording()
@@ -32,21 +37,17 @@ void BeatStudioRecorder::startRecording()
     QAudioFormat format;
     format.setSampleRate(m_sampleRate);
     format.setChannelCount(1);
-    format.setSampleFormat(QAudioFormat::Float);
+    format.setSampleFormat(QAudioFormat::Int16);
 
     QAudioDevice inputDevice = QMediaDevices::defaultAudioInput();
     if (inputDevice.isNull()) {
-        qDebug("[BeatStudio] No audio input device found");
+        qDebug("[BeatStudio] No audio input device");
         return;
     }
 
-    // Check format is supported, fall back to Int16 if needed
     if (!inputDevice.isFormatSupported(format)) {
-        format.setSampleFormat(QAudioFormat::Int16);
-        if (!inputDevice.isFormatSupported(format)) {
-            qDebug("[BeatStudio] Audio format not supported");
-            return;
-        }
+        qDebug("[BeatStudio] Format not supported");
+        return;
     }
 
     {
@@ -58,67 +59,55 @@ void BeatStudioRecorder::startRecording()
     m_audioDevice = m_audioSource->start();
 
     if (!m_audioDevice) {
-        qDebug("[BeatStudio] Failed to start audio source");
+        qDebug("[BeatStudio] Failed to start audio");
         delete m_audioSource;
         m_audioSource = nullptr;
         return;
     }
 
     m_recording = true;
-
-    // Poll for data every 50ms
     connect(m_audioDevice, &QIODevice::readyRead, this, &BeatStudioRecorder::onAudioData);
-
-    qDebug("[BeatStudio] Recording started via Qt QAudioSource");
-}
-
-void BeatStudioRecorder::onAudioData()
-{
-    if (!m_recording || !m_audioDevice) return;
-
-    QByteArray data = m_audioDevice->readAll();
-    if (data.isEmpty()) return;
-
-    QMutexLocker lock(&m_mutex);
-
-    // Check what format we got
-    if (m_audioSource->format().sampleFormat() == QAudioFormat::Float) {
-        const float* samples = reinterpret_cast<const float*>(data.constData());
-        int count = data.size() / sizeof(float);
-        for (int i = 0; i < count; ++i) {
-            m_buffer.push_back(samples[i]);
-            m_buffer.push_back(samples[i]); // mono -> stereo
-        }
-    } else {
-        // Int16
-        const int16_t* samples = reinterpret_cast<const int16_t*>(data.constData());
-        int count = data.size() / sizeof(int16_t);
-        for (int i = 0; i < count; ++i) {
-            float s = samples[i] / 32768.f;
-            m_buffer.push_back(s);
-            m_buffer.push_back(s);
-        }
-    }
+    qDebug("[BeatStudio] Recording started");
 }
 
 void BeatStudioRecorder::stopRecording()
 {
-    if (!m_recording) return;
+    // Don't do anything here directly - use a timer to stop safely
+    // after the current event loop iteration completes
     m_recording = false;
+    QTimer::singleShot(100, this, &BeatStudioRecorder::doStop);
+}
 
+void BeatStudioRecorder::doStop()
+{
     if (m_audioDevice) {
-        disconnect(m_audioDevice, &QIODevice::readyRead, this, &BeatStudioRecorder::onAudioData);
+        disconnect(m_audioDevice, nullptr, this, nullptr);
         m_audioDevice = nullptr;
     }
 
     if (m_audioSource) {
         m_audioSource->stop();
-        m_audioSource->deleteLater(); // safe async delete
+        delete m_audioSource;
         m_audioSource = nullptr;
     }
 
-    qDebug("[BeatStudio] Recording stopped, saving...");
-    QMetaObject::invokeMethod(this, &BeatStudioRecorder::saveWav, Qt::QueuedConnection);
+    saveWav();
+}
+
+void BeatStudioRecorder::onAudioData()
+{
+    if (!m_audioDevice) return;
+    QByteArray data = m_audioDevice->readAll();
+    if (data.isEmpty()) return;
+
+    QMutexLocker lock(&m_mutex);
+    const int16_t* samples = reinterpret_cast<const int16_t*>(data.constData());
+    int count = data.size() / sizeof(int16_t);
+    for (int i = 0; i < count; ++i) {
+        float s = samples[i] / 32768.f;
+        m_buffer.push_back(s);
+        m_buffer.push_back(s);
+    }
 }
 
 void BeatStudioRecorder::saveWav()
@@ -130,7 +119,7 @@ void BeatStudioRecorder::saveWav()
     }
 
     if (data.empty()) {
-        qDebug("[BeatStudio] No audio data recorded");
+        qDebug("[BeatStudio] No audio recorded");
         return;
     }
 
@@ -147,13 +136,12 @@ void BeatStudioRecorder::saveWav()
 
     QFile f(m_outputFile);
     if (!f.open(QIODevice::WriteOnly)) {
-        qDebug("[BeatStudio] Cannot write file: %s", qPrintable(m_outputFile));
+        qDebug("[BeatStudio] Cannot write file");
         return;
     }
 
     QDataStream ds(&f);
     ds.setByteOrder(QDataStream::LittleEndian);
-
     f.write("RIFF", 4);
     ds << (uint32_t)(36 + dataSize);
     f.write("WAVE", 4);
@@ -171,7 +159,7 @@ void BeatStudioRecorder::saveWav()
     }
     f.close();
 
-    qDebug("[BeatStudio] Saved: %s (%zu samples)", qPrintable(m_outputFile), data.size());
+    qDebug("[BeatStudio] Saved: %s", qPrintable(m_outputFile));
     emit recordingFinished(m_outputFile);
 }
 
