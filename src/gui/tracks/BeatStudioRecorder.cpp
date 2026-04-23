@@ -114,8 +114,8 @@ void BeatStudioRecorder::saveWav()
         return;
     }
 
-    QString dir = QStandardPaths::writableLocation(QStandardPaths::MusicLocation);
-    if (dir.isEmpty()) dir = QDir::homePath();
+    // Use a simple path without spaces to avoid issues
+    QString dir = "C:/BeatStudio_Recordings";
     QDir().mkpath(dir);
     QString ts = QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss");
     m_outputFile = dir + "/BeatStudio_" + ts + ".wav";
