@@ -1,8 +1,9 @@
 #pragma once
 #include <QObject>
-#include <QThread>
 #include <QMutex>
 #include <QString>
+#include <QAudioSource>
+#include <QAudioFormat>
 #include <vector>
 #include <atomic>
 
@@ -28,8 +29,8 @@ private slots:
 private:
     void saveWav();
 
-    class QAudioSource* m_audioSource{nullptr};
-    class QIODevice* m_audioDevice{nullptr};
+    QAudioSource* m_audioSource{nullptr};
+    QIODevice* m_audioDevice{nullptr};
     std::vector<float> m_buffer;
     QMutex m_mutex;
     std::atomic<bool> m_recording{false};
