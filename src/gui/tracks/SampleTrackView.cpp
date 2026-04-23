@@ -224,6 +224,11 @@ void SampleTrackView::modelChanged()
 
 void SampleTrackView::dragEnterEvent(QDragEnterEvent *dee)
 {
+	// Accept both internal samplefile drags and files from Explorer
+	if (dee->mimeData()->hasUrls()) {
+		dee->acceptProposedAction();
+		return;
+	}
 	StringPairDrag::processDragEnterEvent(dee, QString("samplefile"));
 }
 
@@ -232,6 +237,24 @@ void SampleTrackView::dragEnterEvent(QDragEnterEvent *dee)
 
 void SampleTrackView::dropEvent(QDropEvent *de)
 {
+	// Handle files dragged from Windows Explorer
+	if (de->mimeData()->hasUrls()) {
+		for (const QUrl& url : de->mimeData()->urls()) {
+			QString filePath = url.toLocalFile();
+			if (filePath.isEmpty()) continue;
+			qDebug("[BeatStudio] Explorer drop: %s", qPrintable(filePath));
+			auto sClip = static_cast<SampleClip*>(getTrack()->createClip(TimePos(0)));
+			if (sClip) {
+				getTrack()->addClip(sClip);
+				sClip->setSampleFile(filePath);
+				qDebug("[BeatStudio] Explorer drop: done");
+			}
+			break; // only first file
+		}
+		de->acceptProposedAction();
+		return;
+	}
+
 	QString type  = StringPairDrag::decodeKey(de);
 	QString value = StringPairDrag::decodeValue(de);
 
