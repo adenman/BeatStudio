@@ -84,17 +84,7 @@ std::shared_ptr<const SampleBuffer> SampleBuffer::fromFile(const QString& filePa
 	{
 		// TODO: Improve error handling. We dont always want to show a message box on failure when there is a GUI (e.g.
 		// when loading the project), and this function also shouldn't be concerned with handling the error.
-		if (gui::getGUI())
-		{
-			QMessageBox::warning(gui::getGUI() ? (QWidget*)gui::getGUI()->mainWindow() : nullptr, QObject::tr("Failed to load sample"),
-				QObject::tr("The sample may be corrupted or unsupported."));
-		}
-		else
-		{
-			qWarning() << QObject::tr(
-				"Failed to load sample at path %1, the file may not exist, be corrupted, or is unsupported.")
-							  .arg(absolutePath);
-		}
+		qWarning() << "[BeatStudio] Failed to load sample:" << absolutePath;
 
 		return SampleBuffer::emptyBuffer();
 	}
@@ -113,14 +103,7 @@ std::shared_ptr<const SampleBuffer> SampleBuffer::fromBase64(const QString& str,
 	{
 		// TODO: Improve error handling. We dont always want to show a message box on failure when there is a GUI (e.g.
 		// when loading the project), and this function also shouldn't be concerned with handling the error.
-		if (gui::getGUI())
-		{
-			QMessageBox::warning(QApplication::activeWindow(), QObject::tr("Failed to load sample"), QObject::tr("The sample size is invalid."));
-		}
-		else
-		{
-			qWarning() << QObject::tr("Failed to load Base64 sample, invalid size");
-		}
+		qWarning() << "[BeatStudio] Failed to load sample:" << absolutePath;
 
 		return SampleBuffer::emptyBuffer();
 	}

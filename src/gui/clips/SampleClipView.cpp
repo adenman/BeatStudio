@@ -195,19 +195,26 @@ void SampleClipView::mouseDoubleClickEvent( QMouseEvent * )
 
 	if (selectedAudioFile.isEmpty()) { return; }
 
-	qDebug("[BeatStudio] mouseDoubleClick: loading %s", qPrintable(selectedAudioFile));
+	qDebug("[BeatStudio] step1: loading file");
 	Engine::audioEngine()->requestChangeInModel();
+	qDebug("[BeatStudio] step2: got model lock");
 	if (!m_clip->hasSampleFileLoaded(selectedAudioFile))
 	{
+		qDebug("[BeatStudio] step3: decoding");
 		auto sampleBuffer = SampleBuffer::fromFile(selectedAudioFile);
+		qDebug("[BeatStudio] step4: decoded, empty=%d", (sampleBuffer == SampleBuffer::emptyBuffer()));
 		if (sampleBuffer != SampleBuffer::emptyBuffer())
 		{
+			qDebug("[BeatStudio] step5: setSampleBuffer");
 			m_clip->setSampleBuffer(sampleBuffer);
+			qDebug("[BeatStudio] step6: setSampleBuffer done");
 		}
 	}
+	qDebug("[BeatStudio] step7: updateLength");
 	m_clip->updateLength();
+	qDebug("[BeatStudio] step8: doneChangeInModel");
 	Engine::audioEngine()->doneChangeInModel();
-	qDebug("[BeatStudio] mouseDoubleClick: done");
+	qDebug("[BeatStudio] step9: complete");
 }
 
 
