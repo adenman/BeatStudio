@@ -122,6 +122,8 @@ extern "C" _CRTIMP errno_t __cdecl freopen_s(FILE** _File,
 
 static QFile* s_logFile = nullptr;
 
+#include <dbghelp.h>
+
 // Beat Studio crash handler - writes crash report to file
 static LONG WINAPI beatStudioCrashHandler(EXCEPTION_POINTERS* ep)
 {
@@ -131,6 +133,54 @@ static LONG WINAPI beatStudioCrashHandler(EXCEPTION_POINTERS* ep)
 		ts << "Time: " << QDateTime::currentDateTime().toString() << "\n";
 		ts << "Exception code: 0x" << QString::number(ep->ExceptionRecord->ExceptionCode, 16) << "\n";
 		ts << "Exception address: 0x" << QString::number((quint64)ep->ExceptionRecord->ExceptionAddress, 16) << "\n";
+
+		// Exception code descriptions
+		DWORD code = ep->ExceptionRecord->ExceptionCode;
+		const char* desc = "Unknown";
+		if (code == EXCEPTION_ACCESS_VIOLATION) desc = "Access Violation (null pointer or bad memory access)";
+		else if (code == EXCEPTION_STACK_OVERFLOW) desc = "Stack Overflow";
+		else if (code == EXCEPTION_ILLEGAL_INSTRUCTION) desc = "Illegal Instruction";
+		else if (code == EXCEPTION_INT_DIVIDE_BY_ZERO) desc = "Division by Zero";
+		else if (code == EXCEPTION_BREAKPOINT) desc = "Breakpoint";
+		ts << "Description: " << desc << "\n";
+
+		// Stack trace using StackWalk64
+		HANDLE process = GetCurrentProcess();
+		HANDLE thread = GetCurrentThread();
+		SymInitialize(process, NULL, TRUE);
+
+		CONTEXT ctx = *ep->ContextRecord;
+		STACKFRAME64 frame = {};
+		frame.AddrPC.Offset = ctx.Rip;
+		frame.AddrPC.Mode = AddrModeFlat;
+		frame.AddrFrame.Offset = ctx.Rbp;
+		frame.AddrFrame.Mode = AddrModeFlat;
+		frame.AddrStack.Offset = ctx.Rsp;
+		frame.AddrStack.Mode = AddrModeFlat;
+
+		ts << "\nStack trace:\n";
+		char symBuffer[sizeof(SYMBOL_INFO) + 256];
+		SYMBOL_INFO* sym = (SYMBOL_INFO*)symBuffer;
+		sym->SizeOfStruct = sizeof(SYMBOL_INFO);
+		sym->MaxNameLen = 255;
+
+		for (int i = 0; i < 20; ++i) {
+			if (!StackWalk64(IMAGE_FILE_MACHINE_AMD64, process, thread,
+				&frame, &ctx, NULL, SymFunctionTableAccess64,
+				SymGetModuleBase64, NULL)) break;
+			if (frame.AddrPC.Offset == 0) break;
+
+			DWORD64 disp = 0;
+			QString funcName = "??";
+			if (SymFromAddr(process, frame.AddrPC.Offset, &disp, sym)) {
+				funcName = QString(sym->Name);
+			}
+			ts << QString("  #%1 0x%2 %3\n")
+				.arg(i)
+				.arg(frame.AddrPC.Offset, 16, 16, QChar('0'))
+				.arg(funcName);
+		}
+		SymCleanup(process);
 		s_logFile->flush();
 	}
 	return EXCEPTION_CONTINUE_SEARCH;
