@@ -24,6 +24,7 @@
  
 #include "SampleClip.h"
 
+#include <QDebug>
 #include <QDomElement>
 #include <QFileInfo>
 
@@ -157,7 +158,9 @@ void SampleClip::setSampleFile(const QString& sf)
 	setStartTimeOffset(0);
 	if (!sf.isEmpty())
 	{
+		qDebug("[BeatStudio] SampleClip::setSampleFile loading: %s", qPrintable(sf));
 		m_sample = Sample(SampleBuffer::fromFile(sf));
+		qDebug("[BeatStudio] SampleClip::setSampleFile loaded ok");
 		updateLength();
 	}
 	else
