@@ -63,7 +63,7 @@ namespace lmms::gui
 SampleTrackView::SampleTrackView( SampleTrack * _t, TrackContainerView* tcv ) :
 	TrackView( _t, tcv )
 {
-	setMinimumHeight( 56 );
+	setFixedHeight( 32 );
 
 	m_tlb = new TrackLabelButton(this, getTrackSettingsWidget());
 	m_tlb->setCheckable(true);
@@ -110,7 +110,7 @@ SampleTrackView::SampleTrackView( SampleTrack * _t, TrackContainerView* tcv ) :
 	m_recordButton->setIcon(embed::getIconPixmap("record"));
 	m_recordButton->setToolTip(tr("Arm track for recording"));
 	m_recordButton->setCheckable(true);
-	m_recordButton->setFixedSize(24, 24);
+	m_recordButton->setFixedSize(14, 14);
 	m_recordButton->setStyleSheet(
 		"QPushButton { background: #2a2a2a; border: 1px solid #444; border-radius: 3px; }"
 		"QPushButton:checked { background: #cc0000; border: 1px solid #ff0000; }"
