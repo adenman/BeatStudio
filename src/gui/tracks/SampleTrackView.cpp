@@ -27,6 +27,7 @@
 #include <QApplication>
 #include <QHBoxLayout>
 #include <QMenu>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QSpacerItem>
 #include <QVBoxLayout>
@@ -114,19 +115,13 @@ SampleTrackView::SampleTrackView( SampleTrack * _t, TrackContainerView* tcv ) :
 	);
 	// Beat Studio: standalone recorder
 	m_recorder = new BeatStudioRecorder(this);
-	connect(m_recorder, &BeatStudioRecorder::recordingFinished, this, [_t](const QString& filePath) {
+	connect(m_recorder, &BeatStudioRecorder::recordingFinished, this, [](const QString& filePath) {
 		qDebug("[BeatStudio] Recording saved to: %s", qPrintable(filePath));
-		// Add the recorded file as a new clip on the track
-		// Use addClip with a properly created clip
-		try {
-			auto* sc = new SampleClip(_t);
-			sc->movePosition(TimePos(0));
-			_t->addClip(sc);
-			sc->setSampleFile(filePath);
-			qDebug("[BeatStudio] Clip added successfully");
-		} catch (...) {
-			qDebug("[BeatStudio] Failed to add clip");
-		}
+		// Show the user where the file was saved
+		QMessageBox::information(nullptr,
+			"Beat Studio - Recording Saved",
+			"Recording saved to:\n" + filePath +
+			"\n\nDrag this file into a sample track to use it.");
 	}, Qt::QueuedConnection);
 	connect(m_recordButton, &QPushButton::toggled, [this](bool checked) {
 		if (checked) {
