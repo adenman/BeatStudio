@@ -76,8 +76,9 @@ bool AudioFileWave::startEncoding()
 		break;
 	}
 
-	// Use file handle to handle unicode file name on Windows
-	m_sf = sf_open_fd( outputFileHandle(), SFM_WRITE, &m_si, false );
+	// Beat Studio: use sf_open with path to avoid MSVC/MinGW ABI mismatch with sf_open_fd
+	const QByteArray pathBytes = outputFile().toLocal8Bit();
+	m_sf = sf_open( pathBytes.constData(), SFM_WRITE, &m_si );
 
 	if (!m_sf)
 	{
