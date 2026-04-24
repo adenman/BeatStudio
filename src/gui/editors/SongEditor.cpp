@@ -45,6 +45,7 @@
 #include "DeprecationHelper.h"
 #include "embed.h"
 #include "GuiApplication.h"
+#include "BeatStudioRecorder.h"
 #include "SampleTrackView.h"
 #include "LcdSpinBox.h"
 #include "MainWindow.h"
