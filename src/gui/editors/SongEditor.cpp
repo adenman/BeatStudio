@@ -1108,7 +1108,7 @@ void SongEditorWindow::recordAccompany()
 	const auto& tvList = m_editor->trackViews();
 	for (auto* tv : tvList) {
 		if (auto* stv = dynamic_cast<SampleTrackView*>(tv)) {
-			if (stv->recorder() && !stv->recorder()->isRunning()) {
+			if (stv->recorder() && !stv->recorder()->isRecording()) {
 				stv->recorder()->startRecording();
 				stv->recordButton()->setChecked(true);
 			}
@@ -1130,7 +1130,7 @@ void SongEditorWindow::stop()
 	const auto& tvList = m_editor->trackViews();
 	for (auto* tv : tvList) {
 		if (auto* stv = dynamic_cast<SampleTrackView*>(tv)) {
-			if (stv->recorder() && stv->recorder()->isRunning()) {
+			if (stv->recorder() && stv->recorder()->isRecording()) {
 				stv->recorder()->stopRecording();
 				stv->recordButton()->setChecked(false);
 			}

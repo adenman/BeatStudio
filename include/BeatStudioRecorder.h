@@ -18,6 +18,7 @@ public:
 
     void startRecording();
     void stopRecording();
+    bool isRecording() const { return m_recording.load(); }
     QString lastRecordedFile() const { return m_outputFile; }
 
 signals:
