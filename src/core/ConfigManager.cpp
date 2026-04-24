@@ -538,7 +538,7 @@ void ConfigManager::loadConfigFile(const QString & configFile)
 		}
 		else if (gui::getGUI() != nullptr)
 		{
-			QMessageBox::warning(nullptr, gui::MainWindow::tr("Configuration file"),
+			QMessageBox::warning(QApplication::activeWindow(), gui::MainWindow::tr("Configuration file"),
 									gui::MainWindow::tr("Error while parsing configuration file at line %1:%2: %3").
 													arg(errorLine).
 													arg(errorCol).
@@ -687,7 +687,7 @@ void ConfigManager::saveConfigFile()
 						).arg(m_lmmsRcFile);
 		if (gui::getGUI() != nullptr)
 		{
-			QMessageBox::critical(nullptr, title, message,
+			QMessageBox::critical(QApplication::activeWindow(), title, message,
 						QMessageBox::Ok,
 						QMessageBox::NoButton);
 		}

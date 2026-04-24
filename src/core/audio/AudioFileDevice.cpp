@@ -23,6 +23,7 @@
  *
  */
 
+#include <QApplication>
 #include <QMessageBox>
 
 #include "AudioFileDevice.h"
@@ -58,7 +59,7 @@ AudioFileDevice::AudioFileDevice( OutputSettings const & outputSettings,
 
 		if (gui::getGUI() != nullptr)
 		{
-			QMessageBox::critical( nullptr, title, message,
+			QMessageBox::critical(QApplication::activeWindow(), title, message,
 						QMessageBox::Ok,
 						QMessageBox::NoButton );
 		}

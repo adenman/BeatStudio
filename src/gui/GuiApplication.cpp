@@ -93,7 +93,7 @@ GuiApplication::GuiApplication()
 
 	// prompt the user to create the LMMS working directory (e.g. ~/Documents/lmms) if it doesn't exist
 	if ( !ConfigManager::inst()->hasWorkingDir() &&
-		QMessageBox::question( nullptr,
+		QMessageBox::question(QApplication::activeWindow(),
 				tr( "Working directory" ),
 				tr( "The LMMS working directory %1 does not "
 				"exist. Create it now? You can change the directory "
