@@ -26,6 +26,8 @@
 
 #include <QApplication>
 #include <QHBoxLayout>
+#include <QInputDialog>
+#include <QLineEdit>
 #include <QMenu>
 #include <QMessageBox>
 #include <QPushButton>
@@ -33,6 +35,8 @@
 #include <QVBoxLayout>
 
 #include "BeatStudioRecorder.h"
+#include <QFile>
+#include <QFileInfo>
 #include <QDesktopServices>
 #include <QFileInfo>
 #include <QUrl>
@@ -120,6 +124,24 @@ SampleTrackView::SampleTrackView( SampleTrack * _t, TrackContainerView* tcv ) :
 	m_recorder = new BeatStudioRecorder(this);
 	connect(m_recorder, &BeatStudioRecorder::recordingFinished, this, [](const QString& filePath) {
 		qDebug("[BeatStudio] Recording saved to: %s", qPrintable(filePath));
+		// Ask user to rename the file
+		bool ok = false;
+		QString defaultName = QFileInfo(filePath).baseName();
+		QString newName = QInputDialog::getText(
+			QApplication::activeWindow(),
+			"Name Your Recording",
+			"Enter a name for this recording:",
+			QLineEdit::Normal,
+			defaultName,
+			&ok
+		);
+		if (ok && !newName.isEmpty() && newName != defaultName) {
+			QString dir = QFileInfo(filePath).absolutePath();
+			QString newPath = dir + "/" + newName + ".wav";
+			if (QFile::rename(filePath, newPath)) {
+				qDebug("[BeatStudio] Renamed to: %s", qPrintable(newPath));
+			}
+		}
 	}, Qt::QueuedConnection);
 	connect(m_recordButton, &QPushButton::toggled, [this](bool checked) {
 		if (checked) {
