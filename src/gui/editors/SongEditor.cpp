@@ -45,6 +45,7 @@
 #include "DeprecationHelper.h"
 #include "embed.h"
 #include "GuiApplication.h"
+#include "SampleTrackView.h"
 #include "LcdSpinBox.h"
 #include "MainWindow.h"
 #include "MeterDialog.h"
@@ -1101,6 +1102,17 @@ void SongEditorWindow::recordAccompany()
 	m_editor->m_song->playAndRecord();
 	m_editor->m_timeLine->setRecording(true);
 	m_editor->m_positionLine->setRecording(true);
+
+	// Beat Studio: auto-start recording on all sample tracks
+	const auto& tvList = m_editor->trackViews();
+	for (auto* tv : tvList) {
+		if (auto* stv = dynamic_cast<SampleTrackView*>(tv)) {
+			if (stv->recorder() && !stv->recorder()->isRunning()) {
+				stv->recorder()->startRecording();
+				stv->recordButton()->setChecked(true);
+			}
+		}
+	}
 }
 
 
@@ -1112,6 +1124,17 @@ void SongEditorWindow::stop()
 	getGUI()->pianoRoll()->stopRecording();
 	m_editor->m_timeLine->setRecording(false);
 	m_editor->m_positionLine->setRecording(false);
+
+	// Beat Studio: stop recording on all sample tracks
+	const auto& tvList = m_editor->trackViews();
+	for (auto* tv : tvList) {
+		if (auto* stv = dynamic_cast<SampleTrackView*>(tv)) {
+			if (stv->recorder() && stv->recorder()->isRunning()) {
+				stv->recorder()->stopRecording();
+				stv->recordButton()->setChecked(false);
+			}
+		}
+	}
 }
 
 

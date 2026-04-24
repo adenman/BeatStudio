@@ -56,6 +56,9 @@ public:
 		return m_window;
 	}
 
+	BeatStudioRecorder* recorder() { return m_recorder; }
+	QPushButton* recordButton() { return m_recordButton; }
+
 	SampleTrack * model()
 	{
 		return castModel<SampleTrack>();
