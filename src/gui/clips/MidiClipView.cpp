@@ -190,6 +190,57 @@ void MidiClipView::transposeSelection()
 }
 
 
+void MidiClipView::humanizeSelection()
+{
+	const auto selection = getClickedClips();
+
+	// Check if any selected clip has notes
+	bool hasNotes = false;
+	for (ClipView* clipview : selection)
+	{
+		if (auto mcv = qobject_cast<MidiClipView*>(clipview))
+		{
+			if (!mcv->getMidiClip()->notes().empty()) { hasNotes = true; break; }
+		}
+	}
+	if (!hasNotes) { return; }
+
+	bool ok = false;
+	int timingAmount = QInputDialog::getInt(this, tr("Humanize"),
+		tr("Timing variation (ticks, 0 = none):"),
+		/*value*/ 4, /*min*/ 0, /*max*/ 192, /*step*/ 1, &ok);
+	if (!ok) { return; }
+
+	int velocityAmount = QInputDialog::getInt(this, tr("Humanize"),
+		tr("Velocity variation (0-100):"),
+		/*value*/ 10, /*min*/ 0, /*max*/ 100, /*step*/ 1, &ok);
+	if (!ok) { return; }
+
+	if (timingAmount == 0 && velocityAmount == 0) { return; }
+
+	QSet<Track*> m_changedTracks;
+	for (ClipView* clipview : selection)
+	{
+		auto mcv = qobject_cast<MidiClipView*>(clipview);
+		if (!mcv) { continue; }
+
+		auto clip = mcv->getMidiClip();
+		if (clip->notes().empty()) { continue; }
+
+		auto track = clipview->getTrackView()->getTrack();
+		if (!m_changedTracks.contains(track))
+		{
+			track->addJournalCheckPoint();
+			m_changedTracks.insert(track);
+		}
+
+		clip->humanizeNotes(clip->notes(), timingAmount, velocityAmount);
+	}
+
+	Engine::getSong()->setModified();
+}
+
+
 
 
 void MidiClipView::constructContextMenu( QMenu * _cm )
@@ -232,6 +283,7 @@ void MidiClipView::constructContextMenu( QMenu * _cm )
 	if (!isBeat)
 	{
 		_cm->addAction(embed::getIconPixmap("scale"), tr("Transpose"), this, &MidiClipView::transposeSelection);
+		_cm->addAction(embed::getIconPixmap("quantize"), tr("Humanize"), this, &MidiClipView::humanizeSelection);
 	}
 	_cm->addSeparator();
 

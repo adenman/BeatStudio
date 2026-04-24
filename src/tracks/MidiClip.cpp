@@ -26,6 +26,7 @@
 #include "MidiClip.h"
 
 #include <algorithm>
+#include <cstdlib>
 #include <QDomElement>
 
 #include "GuiApplication.h"
@@ -326,6 +327,39 @@ void MidiClip::reverseNotes(const NoteVector& notes)
 	emit dataChanged();
 }
 
+
+
+void MidiClip::humanizeNotes(const NoteVector& notes, int timingAmount, int velocityAmount)
+{
+	if (notes.empty()) { return; }
+
+	addJournalCheckPoint();
+
+	for (auto note : notes)
+	{
+		if (timingAmount > 0)
+		{
+			// Random timing offset in range [-timingAmount, +timingAmount]
+			int offset = (std::rand() % (timingAmount * 2 + 1)) - timingAmount;
+			TimePos newPos = note->pos() + offset;
+			// Clamp to 0 so notes don't go negative
+			if (static_cast<int>(newPos) < 0) { newPos = TimePos(0); }
+			note->setPos(newPos);
+		}
+		if (velocityAmount > 0)
+		{
+			// Random velocity offset in range [-velocityAmount, +velocityAmount]
+			int offset = (std::rand() % (velocityAmount * 2 + 1)) - velocityAmount;
+			int newVol = static_cast<int>(note->getVolume()) + offset;
+			// Clamp to valid range [1, 200]
+			newVol = std::max(1, std::min(200, newVol));
+			note->setVolume(static_cast<volume_t>(newVol));
+		}
+	}
+
+	rearrangeAllNotes();
+	emit dataChanged();
+}
 
 
 void MidiClip::splitNotes(const NoteVector& notes, TimePos pos)

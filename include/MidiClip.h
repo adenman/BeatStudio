@@ -81,6 +81,11 @@ public:
 	//! Horizontally flip the positions of the given notes.
 	void reverseNotes(const NoteVector& notes);
 
+	//! Humanize notes by adding random variation to timing and/or velocity.
+	//! timingAmount: max timing offset in ticks (0 = no change)
+	//! velocityAmount: max velocity offset as a percentage of DefaultVolume (0 = no change)
+	void humanizeNotes(const NoteVector& notes, int timingAmount, int velocityAmount);
+
 	// Split the list of notes on the given position
 	void splitNotes(const NoteVector& notes, TimePos pos);
 

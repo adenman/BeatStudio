@@ -81,6 +81,7 @@ protected slots:
 	void resetName();
 	void changeName();
 	void transposeSelection();
+	void humanizeSelection();
 	void clearNotesOutOfBounds();
 
 
