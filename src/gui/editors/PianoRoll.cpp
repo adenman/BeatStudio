@@ -5267,10 +5267,6 @@ PianoRollWindow::PianoRollWindow() :
 	notesActionsToolBar->addSeparator();
 	notesActionsToolBar->addWidget(quantizeButton);
 
-	// Humanize button
-	auto humanizeAction = new QAction(embed::getIconPixmap("quantize"), tr("Humanize (timing + velocity)"), this);
-	connect(humanizeAction, &QAction::triggered, [this](){ m_editor->humanizeNotes(); });
-	notesActionsToolBar->addAction(humanizeAction);
 
 	// -- File actions
 	DropToolBar* fileActionsToolBar = addDropToolBarToTop(tr("File actions"));
@@ -5361,6 +5357,10 @@ PianoRollWindow::PianoRollWindow() :
 	noteToolsButton->addAction(minLengthAction);
 	noteToolsButton->addAction(maxLengthAction);
 	noteToolsButton->addAction(reverseAction);
+
+	auto humanizeAction = new QAction(embed::getIconPixmap("quantize"), tr("Humanize"), noteToolsButton);
+	connect(humanizeAction, &QAction::triggered, [this](){ m_editor->humanizeNotes(); });
+	noteToolsButton->addAction(humanizeAction);
 
 	notesActionsToolBar->addWidget(noteToolsButton);
 
