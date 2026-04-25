@@ -5052,6 +5052,37 @@ void PianoRoll::quantizeNotes(QuantizeAction mode)
 
 
 
+void PianoRoll::humanizeNotes()
+{
+	if (!hasValidMidiClip()) { return; }
+
+	bool ok = false;
+	int timingAmount = QInputDialog::getInt(this, tr("Humanize"),
+		tr("Timing variation (ticks, 0 = none):"),
+		/*value*/ 4, /*min*/ 0, /*max*/ 192, /*step*/ 1, &ok);
+	if (!ok) { return; }
+
+	int velocityAmount = QInputDialog::getInt(this, tr("Humanize"),
+		tr("Velocity variation (0-100):"),
+		/*value*/ 10, /*min*/ 0, /*max*/ 100, /*step*/ 1, &ok);
+	if (!ok) { return; }
+
+	if (timingAmount == 0 && velocityAmount == 0) { return; }
+
+	NoteVector notes = getSelectedNotes();
+	if (notes.empty())
+	{
+		for (Note* n : m_midiClip->notes()) { notes.push_back(n); }
+	}
+
+	m_midiClip->humanizeNotes(notes, timingAmount, velocityAmount);
+
+	update();
+	getGUI()->songEditor()->update();
+	Engine::getSong()->setModified();
+}
+
+
 void PianoRoll::updateSemiToneMarkerMenu()
 {
 	const InstrumentFunctionNoteStacking::ChordTable& chord_table =
@@ -5235,6 +5266,11 @@ PianoRollWindow::PianoRollWindow() :
 	notesActionsToolBar->addAction( pitchBendAction );
 	notesActionsToolBar->addSeparator();
 	notesActionsToolBar->addWidget(quantizeButton);
+
+	// Humanize button
+	auto humanizeAction = new QAction(embed::getIconPixmap("quantize"), tr("Humanize (timing + velocity)"), this);
+	connect(humanizeAction, &QAction::triggered, [this](){ m_editor->humanizeNotes(); });
+	notesActionsToolBar->addAction(humanizeAction);
 
 	// -- File actions
 	DropToolBar* fileActionsToolBar = addDropToolBarToTop(tr("File actions"));
