@@ -231,7 +231,7 @@ bool DataFile::validate( QString extension )
 				extension == "xpf" || extension == "xml" ||
 				( extension == "xiz" && ! getPluginFactory()->pluginSupportingExtension(extension).isNull()) ||
 				extension == "sf2" || extension == "sf3" || extension == "pat" || extension == "mid" ||
-				extension == "dll"
+				extension == "dll" || extension == "vst3"
 #ifdef LMMS_BUILD_LINUX
 				|| extension == "so"
 #endif

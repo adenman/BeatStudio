@@ -1259,6 +1259,9 @@ void FileItem::determineFileType()
 #	if defined(LMMS_HAVE_VST_32) || defined(LMMS_HAVE_VST_64)
 		ext == "dll" ||
 #	endif
+#	if defined(LMMS_BUILD_WIN32)
+		ext == "vst3" ||
+#	endif
 		false
 	)
 	{
