@@ -40,6 +40,8 @@
 
 #include "AudioEngine.h"
 #include "Engine.h"
+#include "GuiApplication.h"
+#include "MainWindow.h"
 #include "Midi.h"
 #include "MidiEvent.h"
 #include "PathUtil.h"
@@ -140,13 +142,14 @@ class Vst3EditorWindow : public QWidget
 {
 public:
 	Vst3EditorWindow(IEditController* controller, const QString& title, std::function<void()> onClosed) :
-		QWidget(nullptr, Qt::Window),
+		// owned by the main window: stays on top of it and doesn't keep the app alive
+		QWidget(gui::getGUI() ? static_cast<QWidget*>(gui::getGUI()->mainWindow()) : nullptr, Qt::Window),
 		m_controller(controller),
 		m_onClosed(std::move(onClosed))
 	{
 		setWindowTitle(title);
 		setAttribute(Qt::WA_NativeWindow);
-		setAttribute(Qt::WA_DontCreateNativeAncestors);
+		setAttribute(Qt::WA_QuitOnClose, false);
 	}
 
 	~Vst3EditorWindow() override { detachView(); }

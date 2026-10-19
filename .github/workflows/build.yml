@@ -407,10 +407,16 @@ jobs:
             -DUSE_WERROR=ON `
             -DVCPKG_TARGET_TRIPLET="x64-windows" `
             -DVCPKG_HOST_TRIPLET="x64-windows" `
+            -DWANT_CALF=OFF -DWANT_CMT=OFF -DWANT_SWH=OFF -DWANT_TAP=OFF -DWANT_CARLA=OFF `
+            -DPLUGIN_LIST="${{ env.plugin_list }}" `
             -DVCPKG_MANIFEST_INSTALL="${{ env.should_install_manifest }}"
         env:
           should_install_manifest:
             ${{ steps.cache-deps.outputs.cache-hit == 'true' && 'NO' || 'YES' }}
+          # BeatStudio doesn't vendor the sources of LMMS's former git submodules
+          # (ZynAddSubFx, Carla, Sid, FreeBoy, OpulenZ, some LADSPA packs), so skip them here
+          plugin_list: >-
+            Amplifier BassBooster BitInvader Bitcrush Compressor CrossoverEQ Delay Dispersion DualFilter DynamicsProcessor Eq Flanger FrequencyShifter GranularPitchShifter HydrogenImport LadspaBrowser LadspaEffect LOMM Lv2Effect Lv2Instrument Lb302 MidiImport MidiExport MultitapEcho Monstro Nes Organic Patman PeakControllerEffect GigPlayer ReverbSC Sf2Player Sfxr SlewDistortion SlicerT SpectrumAnalyzer StereoEnhancer StereoMatrix Stk TapTempo VstBase Vestige VstEffect Vst3Base Vst3Instrument Vst3Effect Watsyn WaveShaper Vectorscope Vibed Xpressive
       - name: Build
         run: cmake --build build
       - name: Run tests
